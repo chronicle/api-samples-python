@@ -1,9 +1,8 @@
-In this directory and its children, we provide three utilities to use the Rules
+In this directory and its children, we provide two utilities to use the Rules
 Engine API:
 
 *   A library for calling the Rules Engine API, in `rule_lib.py`.
 *   A CLI tool, `cli/rule_cmd.py`.
-*   A sample Webserver, `ui/rule_webapp.py`.
 
 If you want to directly use `rule_lib.py` you will have to install the google
 API dependency:
