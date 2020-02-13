@@ -8,7 +8,7 @@ If you want to directly use `rule_lib.py` you will have to install the google
 API dependency:
 
 ```
-pip install google-api-client
+pip3 install google-api-client
 ```
 
 For the two binaries (the CLI and the UI), you should use a virtual environment.
@@ -18,7 +18,7 @@ This will manage all the dependencies for you. To set one up (from either the
 ```
 python3 -m venv venv
 source venv/bin/activate
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 ```
 
 This will create a virtual environment and install all the required

@@ -371,8 +371,15 @@ class RuleLib():
                       'ruleId': 'ru_c76616b8-40dd-4dc7-8b11-c4f7df4c9cef'},
          'name': 'operations/rulejob_jo_2047d71c-28e9-4fbb-adee-2f0847eefd2e',
          'response': {'@type': 'type.googleapis.com/chronicle.backstory.v1.RunRuleResponse'}},
+        {'metadata': {'@type': 'type.googleapis.com/chronicle.backstory.v1.RunRuleMetadata',
+                      'ruleId': 'ru_226616b9-466d-4777-8991-11f7df4c9c44'},
+         'name': 'operations/rulejob_jo_2047d71c-28e9-4fbb-adee-2f0847eefd2e'},
         ...
        ]
+
+    Note that in the above example output, the first two operations are done
+    (there is a 'done':True entry in the dictionary, and there is a populated
+    'response'), while the third is not (no 'done' or 'response' entries).
     """
     url = "{}/operations".format(self.backstory_api_url)
     _LOGGER_.info("list operations: %s ", url)
