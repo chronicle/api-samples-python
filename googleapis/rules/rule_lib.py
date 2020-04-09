@@ -302,12 +302,7 @@ class RuleLib():
       operation_id: an operation id
 
     Returns:
-      {'metadata': {
-          'eventEndTime': '2019-12-04T17:02:47Z',
-          'ruleId': 'ru_13f58277-8d41-45b2-ab6b-1addc4e3ca0e',
-          'eventStartTime': '2019-11-25T00:00:00Z'
-          },
-       'results': [
+      {'results': [
              {'match': {
                ... sinlge event in udm format ...
                        }
