@@ -386,10 +386,6 @@ class RuleLib():
   def wait_operation(self, operation_id):
     """Implement a local wait for an operation with GetOperation loop.
 
-    This is a temporary solution until the wait call is implemented at the
-    API level. When that happens, we can swap out the code here and code
-    that is dependent on this library can remain unchanged.
-
     Args:
       operation_id: an operation id
 
@@ -405,6 +401,8 @@ class RuleLib():
       # We can catch this and throw a different error if that is more
       # compatible with the wait operation call when it is implemented.
       rule = self.get_operation(operation_id)
+      if rule.get("metadata").get("@type") == "type.googleapis.com/chronicle.backstory.v1.EnableLiveRuleMetadata":
+        break
       if rule.get("done", False):
         break
       _LOGGER_.info("Sleeping for %d seconds", sleep)
