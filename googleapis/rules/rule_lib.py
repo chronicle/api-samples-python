@@ -294,6 +294,33 @@ class RuleLib():
         headers={"Content-type": "application/x-www-form-urlencoded"},
         body=urllib.parse.urlencode(body))
     return self._parse_response(response)
+  
+  def enable_live_rule(self, rule_id):
+    """Call the EnableLiveRule RPC.
+
+    Args:
+      rule_id: A rule id string that begins with ru_
+
+    Returns:
+      {'name': 'operations/rulejob_jo_0440fca2-ff4b-4067-b16a-e8bc2368fc15'}
+    """
+    if not rule_id:
+      raise ValueError(
+          "Missing rule id")
+
+    url = "{}/rules/{}:enableLive".format(self.backstory_api_url, rule_id)
+    _LOGGER_.info("enable live rule: %s ", url)
+
+    # Construct the post body for the create rule request.
+    body = {}
+
+    # Make a request
+    response = self.client.request(
+        url,
+        method="POST",
+        headers={"Content-type": "application/x-www-form-urlencoded"},
+        body=urllib.parse.urlencode(body))
+    return self._parse_response(response)
 
   def list_results(self, operation_id, page_size=0, page_token=''):
     """Call the ListResults RPC.
