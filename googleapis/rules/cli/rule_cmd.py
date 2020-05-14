@@ -39,6 +39,7 @@ ALLOWED_RPCS = [
     'UpdateRule',
     'DeleteRule',
     'RunRule',
+    'EnableLiveRule',
     'ListResults',
     'GetOperation',
     'ListOperations',
@@ -74,6 +75,8 @@ def main():
     res = rule_wrap.delete_rule(args.rule_id)
   elif rpc == 'RunRule':
     res = rule_wrap.run_rule(args.rule_id, args.start_time, args.end_time)
+  elif rpc == 'EnableLiveRule':
+    res = rule_wrap.enable_live_rule(args.rule_id)
   elif rpc == 'ListResults':
     res = rule_wrap.list_results(
         args.operation_id, args.page_size, args.page_token)
