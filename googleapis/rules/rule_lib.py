@@ -308,7 +308,7 @@ class RuleLib():
       raise ValueError(
           "Missing rule id")
 
-    url = "{}/rules/{}:enableLive".format(self.backstory_api_url, rule_id)
+    url = "{}/rules/{}:enableLiveRule".format(self.backstory_api_url, rule_id)
     _LOGGER_.info("enable live rule: %s ", url)
 
     # Construct the post body for the create rule request.
