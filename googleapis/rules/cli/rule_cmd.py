@@ -46,6 +46,7 @@ ALLOWED_RPCS = [
     'WaitOperation',
     'DeleteOperation',
     'CancelOperation',
+    'StreamRuleNotifications',
 ]
 
 
@@ -55,7 +56,7 @@ def main():
 
   # If verbose was setup, update the logging level early
   if args.verbose:
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s:%(levelname)s:%(name)s:%(message)s")
 
   # Create an instance of the rule api wrapper
   rule_wrap = rule_lib.RuleLib()
@@ -90,6 +91,9 @@ def main():
     res = rule_wrap.delete_operation(args.operation_id)
   elif rpc == 'CancelOperation':
     res = rule_wrap.cancel_operation(args.operation_id)
+  elif rpc == 'StreamRuleNotifications':
+    res = rule_wrap.stream_rule_notifications(args.continuation_time)
+
   else:
     parser.print_usage()
     sys.exit('rpc request was not recognized: %s' % rpc)
@@ -120,6 +124,8 @@ def _parse_args():
                       help='number of entries to return')
   parser.add_argument('-pt', '--page_token', type=str, default='',
                       help='page token to use to get next page')
+  parser.add_argument('-ct', '--continuation_time', type=str, default='',
+                      help='continuation time in RFC3339 format, for notifications stream')
   args = parser.parse_args()
   return (parser, args)
 

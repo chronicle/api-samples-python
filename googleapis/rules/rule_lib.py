@@ -33,6 +33,9 @@ import urllib
 # Get these packages from https://pypi.org/project/google-api-python-client/
 # or run $ pip install google-api-python-client from your terminal.
 from googleapiclient import _auth
+import requests
+import rule_notification_integrations
+import rule_utils
 
 from google.oauth2 import service_account
 
@@ -50,7 +53,7 @@ class RuleLib():
 
   def __init__(self):
     self.backstory_api_url = API_URL
-    self.client = self._create_authenticated_http_client()
+    self.client, self.service_account_credentials = self._create_authenticated_http_client()
 
   def _create_authenticated_http_client(self):
     """Create the http client using local credential file storing oauth json."""
@@ -69,7 +72,7 @@ class RuleLib():
         service_account_file, scopes=scopes)
 
     # Build a Http client that can make authorized OAuth requests.
-    return _auth.authorized_http(credentials)
+    return _auth.authorized_http(credentials), credentials
 
   def _parse_response(self, resp):
     """Print the request url & response/error returned by the http client.
@@ -103,6 +106,117 @@ class RuleLib():
     _LOGGER_.error("  transport: %s", pprint.pformat(transport))
 
     raise ValueError(("problem with rpc call", rpc_obj, transport))
+
+  def stream_rule_notifications(self, continuation_time):
+    """Call the StreamRuleNotifications RPC in a retry loop with exponential backoff.
+
+    Processes a stream of rule notification batches.
+    A notification batch is a dictionary.
+
+    A notification batch might have the key "error"; if it does, you should
+    retry connecting with exponential backoff.
+
+    A notification batch might be an empty dictionary; these are meant as
+    keep-alive heartbeats from the server, which your client can ignore.
+
+    If none of the above apply, a notification batch will have a key
+    "continuationTime" (see the documentation of the continuation_time
+    argument below). It will optionally have a key "notifications", whose
+    value is a list of rule notifications (see example below for the
+    format of a rule notification).
+
+    Example notification batch without notifications list:
+      {
+        'continuationTime': '2019-04-15T21:59:17.081331Z'
+      }
+
+    Example notification batch with notifications list:
+      {
+        'continuationTime': '2019-05-29T05:00:04.123073Z',
+        'notifications': [
+          {
+            'result': {'match': { ... single event in udm format ... } },
+            'ruleId': 'ru_13f58277-8d41-45b2-ab6b-1addc4e3ca0e',
+            'operation':
+            'operations/rulejob_jo_fd826fb3-fdfa-40d0-8681-482fc014ef62'
+          }, ... ]
+      }
+
+    Args:
+      continuation_time: a string containing a time in rfc3339 format, to
+        request all notifications created at or after a time; can be omitted to
+        request notifications created at or after the current time
+
+    Returns:
+      None
+
+    Raises:
+      RuntimeError - Hit retry limit after multiple consecutive failures
+        without success
+    """
+
+    url = "{}/rules:streamRuleNotifications".format(self.backstory_api_url)
+    _LOGGER_.info("stream rule notifications: %s ", url)
+
+    # Our retry loop uses exponential backoff. For simplicity, we retry for all
+    # types of errors, which is fine because we've set a retry limit.
+    max_consecutive_failures = 7
+    consecutive_failures = 0
+    while True:
+      if consecutive_failures > max_consecutive_failures:
+        raise RuntimeError(
+            "exiting retry loop. consecutively failed {} times without success"
+            .format(consecutive_failures))
+
+      if consecutive_failures:
+        sleep_duration = 2**consecutive_failures
+        _LOGGER_.info("sleeping %d seconds before retrying", sleep_duration)
+        time.sleep(sleep_duration)
+
+      data = {} if not continuation_time else {
+          "continuationTime": continuation_time
+      }
+      headers = {}
+      _auth.apply_credentials(self.service_account_credentials, headers)
+
+      disconnection_reason = None
+      # Heartbeats are sent by the server, approximately every 15s. We impose a
+      # client-side timeout; if more than 60s pass between messages from the server,
+      # the client cancels connection (then retries).
+      with requests.post(url, stream=True, data=data, headers=headers, timeout=60) as response:
+        _LOGGER_.info(
+            "initiated connection to notifications stream with request: %s",
+            data)
+        if response.status_code != 200:
+          disconnection_reason = "connection refused with status={}, error={}".format(
+              response.status_code, response.text)
+        else:
+          for notification_batch in rule_utils.parse_notification_stream(response):
+            if not notification_batch:
+              _LOGGER_.info("Got empty heartbeat")
+              continue
+            if "error" in notification_batch:
+              disconnection_reason = "connection closed with error: {}".format(
+                  json.dumps(notification_batch["error"], indent="\t"))
+              break
+            else:
+              consecutive_failures = 0
+
+            # Update continuation_time so that when we retry after a broken connection,
+            # we resume receiving results from where we left off.
+            continuation_time = notification_batch["continuationTime"]
+            _LOGGER_.info("Got response with continuationTime=%s", continuation_time)
+
+            if "notifications" in notification_batch:
+              # We have a notification batch with notifications to process.
+              # Process them however you like. Here's an example:
+              rule_notification_integrations.slack_webhook(
+                  continuation_time, notification_batch["notifications"])
+
+      # When we reach this line of code, we have disconnected.
+      consecutive_failures += 1
+      _LOGGER_.error(disconnection_reason if disconnection_reason else
+                     "connection unexpectedly closed")
 
   def get_rule(self, rule_id):
     r"""Call the GetRule RPC.
@@ -294,7 +408,7 @@ class RuleLib():
         headers={"Content-type": "application/x-www-form-urlencoded"},
         body=urllib.parse.urlencode(body))
     return self._parse_response(response)
-  
+
   def enable_live_rule(self, rule_id):
     """Call the EnableLiveRule RPC.
 
