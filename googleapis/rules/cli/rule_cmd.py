@@ -17,6 +17,7 @@
 
 import argparse
 import logging
+import json
 import os
 import pprint
 import sys
@@ -99,7 +100,10 @@ def main():
     sys.exit('rpc request was not recognized: %s' % rpc)
 
   if res:
-    pprint.pprint(res)
+    if args.output == 'json':
+      print(json.dumps(res))
+    else:
+      pprint.pprint(res)
 
 
 def _parse_args():
@@ -126,6 +130,8 @@ def _parse_args():
                       help='page token to use to get next page')
   parser.add_argument('-ct', '--continuation_time', type=str, default='',
                       help='continuation time in RFC3339 format, for notifications stream')
+  parser.add_argument('-o', '--output', type=str, default='python',
+                      help='output format. valid: json,python')
   args = parser.parse_args()
   return (parser, args)
 
