@@ -137,6 +137,7 @@ class RuleLib():
           {
             'result': {'match': { ... single event in udm format ... } },
             'ruleId': 'ru_13f58277-8d41-45b2-ab6b-1addc4e3ca0e',
+            'rule': 'NameOfRule',
             'operation':
             'operations/rulejob_jo_fd826fb3-fdfa-40d0-8681-482fc014ef62'
           }, ... ]
