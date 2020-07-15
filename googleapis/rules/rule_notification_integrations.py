@@ -31,6 +31,8 @@ import requests
 
 _LOGGER_ = logging.getLogger(__name__)
 
+# WEBHOOK_URL is used for chat ops integrations. The example shown below features
+# slack webhooks, but will also work with google chat webhooks.
 # The slack integration is disabled when WEBHOOK_URL is None.
 # To try the slack webhook integration, populate WEBHOOK_URL with a string, e.g.
 # WEBHOOK_URL = "https://hooks.slack.com/services/yourWebhookHere"
@@ -78,20 +80,21 @@ def slack_webhook(continuation_time, notifications):
       "Got stream response with continuationTime {}, containing {} notifications."
       .format(continuation_time, batch_size))
 
-  # Aggregate by each (RuleID/Operation), and list the count of
+  # Aggregate by each (Rule/Operation), and list the count of
   # associated notifications. Recall that the server's notifications
   # ARE NOT AGGREGATED, and are NOT SORTED in any particular grouping/order.
   # This aggregation is done entirely within this python client code.
   report_lines.append("Summary of notifications:")
-  # notif_metadatas is a list of the metadata (i.e., RuleID and operation name)
-  # from all the notifications.
+  # notif_metadatas is a list of the metadata (i.e., RuleID, rule name, and
+  # operation name) from all the notifications.
   notif_metadatas = [
-      tuple((notif["ruleId"], notif["operation"])) for notif in notifications
+      tuple((notif["rule"], notif["ruleId"], notif["operation"]))
+      for notif in notifications
   ]
   for notif_metadata, count in collections.Counter(notif_metadatas).items():
     report_lines.append(
-        "\t{} notifications from Rule `{}`, Operation `{}`".format(
-            count, notif_metadata[0], notif_metadata[1]))
+        "\t{} notifications from Rule `{}` (`{}`), Operation `{}`".format(
+            count, notif_metadata[0], notif_metadata[1], notif_metadata[2]))
 
   if batch_size > MAX_BATCH_SIZE_TO_REPORT_IN_DETAIL:
     # Avoid flooding our output channels.
@@ -110,8 +113,8 @@ def slack_webhook(continuation_time, notifications):
     # Output each notification's metadata (Rule and Operation IDs), and its UDM event.
     report_lines.append("UDM events from notifications are listed below:")
     for idx, notif in enumerate(notifications):
-      report_lines.append("{}) from Rule `{}`, Operation `{}`".format(
-          idx, notif["ruleId"], notif["operation"]))
+      report_lines.append("{}) from Rule `{}` (`{}`), Operation `{}`".format(
+          idx, notif["rule"], notif["ruleId"], notif["operation"]))
       report_lines.append("```{}```".format(
           json.dumps(notif["result"]["match"], indent="\t")))
 
