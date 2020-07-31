@@ -2,7 +2,7 @@ In this directory and its children, we provide two utilities to use the Rules
 Engine API:
 
 *   A library for calling the Rules Engine API, in `rule_lib.py`.
-*   A CLI tool, `cli/rule_cmd.py`.
+*   A CLI tool, [`cli/rule_cmd.py`](./cli/rule_cmd.py).
 
 You should use a virtual environment, which will manage all the dependencies for
 you. To set one up, and install all dependencies:
