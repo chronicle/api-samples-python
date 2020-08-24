@@ -28,8 +28,7 @@ import collections
 import json
 import logging
 import requests
-
-_LOGGER_ = logging.getLogger(__name__)
+from datetime import datetime
 
 # WEBHOOK_URL is used for chat ops integrations. The example shown below features
 # slack webhooks, but will also work with google chat webhooks.
@@ -57,22 +56,47 @@ MAX_BATCH_SIZE_TO_REPORT_IN_DETAIL = 100
 NOTIFICATIONS_PER_WEBHOOK_MESSAGE = 3
 
 
-def slack_webhook(continuation_time, notifications):
-  """Process one notification batch from stream_rule_notifications.
-
-  Forms a textual report to summarize notifications, logs it, then
-  sends the report to a slack webhook.
+def print_notifications(notification_batch):
+  """Print a set of notifications.
 
   Args:
-    continuation_time: pass in notification_batch["continuationTime"], which is
-      a string containing a time in rfc3339 format, that we will log
-    notifications: pass in notification_batch["notifications"], which is a list
-      of dictionaries containing rule notifications
+    notification_batch: Contains a list of notifications in
+      notification_batch["notifications"] if notifications are present, and a
+      continuation time in notification_batch["continuationTime"].
 
   Returns:
     None
   """
+  time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+  if "notifications" in notification_batch and notification_batch["notifications"]:
+    print("[{}] Received new notifications.".format(time))
+    print(json.dumps(notification_batch, indent="  "))
+  else:
+    print("[{}] No new notifications at this time.".format(time))
 
+
+def slack_webhook(notification_batch):
+  """Process one notification batch from stream_rule_notifications.
+
+  Forms a textual report to summarize notifications and then sends the report to
+  a slack webhook. This function requires WEBHOOK_URL to be set. Otherwise it
+  will return immediately.
+
+  Args:
+    notification_batch: Contains a list of notifications in
+      notification_batch["notifications"] if notifications are present, and a
+      continuation time in notification_batch["continuationTime"].
+
+  Returns:
+    None
+  """
+  if not WEBHOOK_URL:
+    return
+  if "notifications" not in notification_batch or not notification_batch["notifications"]:
+    return
+
+  notifications = notification_batch["notifications"]
+  continuation_time = notification_batch["continuationTime"]
   batch_size = len(notifications)
 
   report_lines = []
@@ -105,8 +129,6 @@ def slack_webhook(continuation_time, notifications):
                         "call list_results and pass in that operation.")
     report_lines.append("")
     report_string = "\n".join(report_lines)
-
-    _LOGGER_.info(report_string)
     if WEBHOOK_URL:
       requests.post(WEBHOOK_URL, json={"text": report_string})
   else:
@@ -125,6 +147,4 @@ def slack_webhook(continuation_time, notifications):
         report_lines.clear()
         report_lines.append("")
 
-        _LOGGER_.info(report_string)
-        if WEBHOOK_URL:
-          requests.post(WEBHOOK_URL, json={"text": report_string})
+        requests.post(WEBHOOK_URL, json={"text": report_string})
