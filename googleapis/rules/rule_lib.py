@@ -208,11 +208,9 @@ class RuleLib():
             continuation_time = notification_batch["continuationTime"]
             _LOGGER_.info("Got response with continuationTime=%s", continuation_time)
 
-            if "notifications" in notification_batch:
-              # We have a notification batch with notifications to process.
-              # Process them however you like. Here's an example:
-              rule_notification_integrations.slack_webhook(
-                  continuation_time, notification_batch["notifications"])
+            # Process received notifications.
+            rule_notification_integrations.print_notifications(notification_batch)
+            rule_notification_integrations.slack_webhook(notification_batch)
 
       # When we reach this line of code, we have disconnected.
       consecutive_failures += 1
