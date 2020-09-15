@@ -26,22 +26,22 @@ These utils are for python3.
 import json
 
 
-def parse_notification_stream(response):
-  """Parse the stream_rule_notifications response.
+def parse_stream(response):
+  """Parse stream response.
 
   The requests library provides utilities for iterating over the HTTP stream
-  response, so we do not have to worry about chunked transfer encoding.
-  The response is a stream of bytes that represent a json array.
-  Each top-level element of the json array is a notification batch.
-  The array is "never ending"; the server can send a notification batch
-  at any time, thus adding to the json array.
+  response, so we do not have to worry about chunked transfer encoding. The
+  response is a stream of bytes that represent a json array.
+  Each top-level element of the json array is a batch. The array is "never
+  ending"; the server can send a batch at any time, thus
+  adding to the json array.
 
   Args:
-    response: the requests.Response Object returned from requests.post()
+    response: The requests.Response Object returned from requests.post().
 
-  Returns:
-    A generator that yields dictionary representations of each notification
-      batch that was sent over the stream
+  Yields:
+    Dictionary representations of each notification batch that was sent over the
+    stream.
   """
   try:
     if response.encoding is None:
@@ -60,8 +60,8 @@ def parse_notification_stream(response):
       yield json.loads(json_string)
   except Exception as e:
     # Chronicle's servers will generally send a {"error": ...} dict over the
-    # stream to indicate retryable failures (e.g. due to periodic internal server
-    # maintenance), which will not cause this except block to fire.
+    # stream to indicate retryable failures (e.g. due to periodic internal
+    # server maintenance), which will not cause this except block to fire.
     #
     # In rarer cases, the streaming connection may silently fail; the
     # connection will close without an error dict, which manifests as a
@@ -72,8 +72,8 @@ def parse_notification_stream(response):
     # Instead of allowing streaming clients to crash (for ChunkedEncodingErrors,
     # and for other Exceptions that may occur while reading from the stream),
     # we will catch exceptions, then yield a dict containing the error,
-    # so the client may report the error, then retry connection (with backoff, and
-    # retry limit).
+    # so the client may report the error, then retry connection (with backoff,
+    # and retry limit).
     yield {
         "error": {
             "code": 500,
