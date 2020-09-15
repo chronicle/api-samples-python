@@ -59,7 +59,7 @@ class RuleLib():
     """Create the http client using local credential file storing oauth json."""
     # Constants
     scopes = ["https://www.googleapis.com/auth/chronicle-backstory"]
-     # Or the location you placed your JSON file.
+    # Or the location you placed your JSON file.
     service_account_file = os.path.abspath(
         os.path.join(os.environ["HOME"], "bk_credentials.json"))
     if not os.path.exists(service_account_file):
@@ -107,46 +107,31 @@ class RuleLib():
 
     raise ValueError(("problem with rpc call", rpc_obj, transport))
 
-  def stream_rule_notifications(self, continuation_time):
-    """Call the StreamRuleNotifications RPC in a retry loop with exponential backoff.
+  def _stream(self, continuation_time, url, integrations):
+    """Call the streaming RPC in a retry loop with exponential backoff.
 
-    Processes a stream of rule notification batches.
-    A notification batch is a dictionary.
+    Processes a stream of batches.
+    A batch is a dictionary.
 
-    A notification batch might have the key "error"; if it does, you should
-    retry connecting with exponential backoff.
+    A batch might have the key "error"; if it does, you should retry connecting
+    with exponential backoff.
 
-    A notification batch might be an empty dictionary; these are meant as
-    keep-alive heartbeats from the server, which your client can ignore.
+    A batch might be an empty dictionary; these are meant as keep-alive
+    heartbeats from the server, which your client can ignore.
 
-    If none of the above apply, a notification batch will have a key
-    "continuationTime" (see the documentation of the continuation_time
-    argument below). It will optionally have a key "notifications", whose
-    value is a list of rule notifications (see example below for the
-    format of a rule notification).
-
-    Example notification batch without notifications list:
-      {
-        'continuationTime': '2019-04-15T21:59:17.081331Z'
-      }
-
-    Example notification batch with notifications list:
-      {
-        'continuationTime': '2019-05-29T05:00:04.123073Z',
-        'notifications': [
-          {
-            'result': {'match': { ... single event in udm format ... } },
-            'ruleId': 'ru_13f58277-8d41-45b2-ab6b-1addc4e3ca0e',
-            'rule': 'NameOfRule',
-            'operation':
-            'operations/rulejob_jo_fd826fb3-fdfa-40d0-8681-482fc014ef62'
-          }, ... ]
-      }
+    If none of the above apply, a batch will have a key "continuationTime"
+    (see the documentation of the continuation_time argument below). It will
+    optionally have a key such as "notifications" or "detections" whose value is
+    a list of notifications or alerts from Rules Engine.
 
     Args:
-      continuation_time: a string containing a time in rfc3339 format, to
+      continuation_time: A string containing a time in rfc3339 format, to
         request all notifications created at or after a time; can be omitted to
-        request notifications created at or after the current time
+        request notifications created at or after the current time.
+      url: A string representing the URL endpoint.
+      integrations: A list of functions that integrate the stream results with
+        other platforms. These functions must have one argument, a dict
+        containing a batch from parse_stream.
 
     Returns:
       None
@@ -155,10 +140,6 @@ class RuleLib():
       RuntimeError - Hit retry limit after multiple consecutive failures
         without success
     """
-
-    url = "{}/rules:streamRuleNotifications".format(self.backstory_api_url)
-    _LOGGER_.info("stream rule notifications: %s ", url)
-
     # Our retry loop uses exponential backoff. For simplicity, we retry for all
     # types of errors, which is fine because we've set a retry limit.
     max_consecutive_failures = 7
@@ -182,9 +163,10 @@ class RuleLib():
 
       disconnection_reason = None
       # Heartbeats are sent by the server, approximately every 15s. We impose a
-      # client-side timeout; if more than 60s pass between messages from the server,
-      # the client cancels connection (then retries).
-      with requests.post(url, stream=True, data=data, headers=headers, timeout=60) as response:
+      # client-side timeout; if more than 60s pass between messages from the
+      # server, the client cancels connection (then retries).
+      with requests.post(
+          url, stream=True, data=data, headers=headers, timeout=60) as response:
         _LOGGER_.info(
             "initiated connection to notifications stream with request: %s",
             data)
@@ -192,30 +174,128 @@ class RuleLib():
           disconnection_reason = "connection refused with status={}, error={}".format(
               response.status_code, response.text)
         else:
-          for notification_batch in rule_utils.parse_notification_stream(response):
-            if not notification_batch:
+          for batch in rule_utils.parse_stream(response):
+            if not batch:
               _LOGGER_.info("Got empty heartbeat")
               continue
-            if "error" in notification_batch:
+            if "error" in batch:
               disconnection_reason = "connection closed with error: {}".format(
-                  json.dumps(notification_batch["error"], indent="\t"))
+                  json.dumps(batch["error"], indent="\t"))
               break
             else:
               consecutive_failures = 0
 
-            # Update continuation_time so that when we retry after a broken connection,
-            # we resume receiving results from where we left off.
-            continuation_time = notification_batch["continuationTime"]
-            _LOGGER_.info("Got response with continuationTime=%s", continuation_time)
+            # Update continuation_time so that when we retry after a broken
+            # connection, we resume receiving results from where we left off.
+            continuation_time = batch["continuationTime"]
+            _LOGGER_.info("Got response with continuationTime=%s",
+                          continuation_time)
 
-            # Process received notifications.
-            rule_notification_integrations.print_notifications(notification_batch)
-            rule_notification_integrations.slack_webhook(notification_batch)
+            # Process results.
+            for integration in integrations:
+              integration(batch)
 
       # When we reach this line of code, we have disconnected.
       consecutive_failures += 1
       _LOGGER_.error(disconnection_reason if disconnection_reason else
                      "connection unexpectedly closed")
+
+  def stream_rule_notifications(self, continuation_time):
+    """Call the StreamRuleNotifications RPC in a retry loop with exponential backoff.
+
+    The StreamRuleNotifications RPC streams notifications from Rules Engine V1.
+
+    Example notification batch without notifications list:
+      {
+        'continuationTime': '2019-04-15T21:59:17.081331Z'
+      }
+
+    Example notification batch with notifications list:
+      {
+        'continuationTime': '2019-05-29T05:00:04.123073Z',
+        'notifications': [
+          {
+            'result': {'match': { ... single event in udm format ... } },
+            'ruleId': 'ru_13f58277-8d41-45b2-ab6b-1addc4e3ca0e',
+            'rule': 'NameOfRule',
+            'operation':
+            'operations/rulejob_jo_fd826fb3-fdfa-40d0-8681-482fc014ef62'
+          }, ... ]
+      }
+
+
+    Args:
+      continuation_time: a string containing a time in rfc3339 format, to
+        request all notifications created at or after a time; can be omitted to
+        request notifications created at or after the current time.
+
+    Returns:
+      None
+
+    Raises:
+      RuntimeError - Hit retry limit after multiple consecutive failures
+        without success
+    """
+    url = "{}/rules:streamRuleNotifications".format(self.backstory_api_url)
+    _LOGGER_.info("stream rule notifications: %s ", url)
+    self._stream(continuation_time, url, [
+        rule_notification_integrations.print_notifications,
+        rule_notification_integrations.slack_webhook_notifications
+    ])
+
+  def stream_detections(self, continuation_time):
+    """Call the StreamDetections RPC in a retry loop with exponential backoff.
+
+    The StreamDetections RPC streams alerts from Rules Engine V2.
+
+    Example detection batch without detections list:
+      {
+        'continuationTime': '2019-04-15T21:59:17.081331Z'
+      }
+
+    Example detection batch with detections list:
+      {
+        'continuationTime': '2019-05-29T05:00:04.123073Z',
+        'detections': [
+          {
+            "metadata": {
+              "ruleId": "ru_bce9e2a0-0c7a-48f0-9912-dbb40259405e",
+              "rule": "NameOfRule",
+              "versionTime": "2020-09-08T20:34:19.543407Z"
+            },
+            "detectionInfo": {
+              "timeWindow": {
+                "startTime": "2020-09-08T19:04:09.881104Z",
+                "endTime": "2020-09-08T19:04:09.881104Z"
+              },
+              "resultEvents": {
+                "e": {
+                  "events": [ ... event in udm format ... ]
+                }
+              }
+            }
+          }, ... ]
+      }
+
+
+    Args:
+      continuation_time: a string containing a time in rfc3339 format, to
+        request all alerting detections created at or after a time; can be omitted to
+        request detections created at or after the current time.
+
+    Returns:
+      None
+
+    Raises:
+      RuntimeError - Hit retry limit after multiple consecutive failures
+        without success
+    """
+    url = "{}/rules:streamDetections".format(self.backstory_api_url)
+    _LOGGER_.info("stream detections: %s ", url)
+    self._stream(continuation_time, url, [
+        rule_notification_integrations.print_detections,
+        rule_notification_integrations.slack_webhook_detections
+    ])
 
   def get_rule(self, rule_id):
     r"""Call the GetRule RPC.
@@ -435,7 +515,7 @@ class RuleLib():
         body=urllib.parse.urlencode(body))
     return self._parse_response(response)
 
-  def list_results(self, operation_id, page_size=0, page_token=''):
+  def list_results(self, operation_id, page_size=0, page_token=""):
     """Call the ListResults RPC.
 
     Args:

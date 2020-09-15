@@ -48,6 +48,7 @@ ALLOWED_RPCS = [
     'DeleteOperation',
     'CancelOperation',
     'StreamRuleNotifications',
+    'StreamDetections',
 ]
 
 
@@ -94,6 +95,8 @@ def main():
     res = rule_wrap.cancel_operation(args.operation_id)
   elif rpc == 'StreamRuleNotifications':
     res = rule_wrap.stream_rule_notifications(args.continuation_time)
+  elif rpc == 'StreamDetections':
+    res = rule_wrap.stream_detections(args.continuation_time)
 
   else:
     parser.print_usage()
