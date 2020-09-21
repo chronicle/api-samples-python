@@ -210,8 +210,8 @@ def slack_webhook_detections(detection_batch):
   # ARE NOT AGGREGATED, and are NOT SORTED in any particular grouping/order.
   # This aggregation is done entirely within this python client code.
   report_lines.append("Summary of detections:")
-  # detection_metadatas is a list of the metadata (i.e., rule name, RuleID, and
-  # version time) from all the detections.
+  # detection_metadatas is a list of the metadata (i.e., rule name, RuleId, and
+  # VersionTime) from all the detections.
   detection_metadatas = [
       tuple((detection["metadata"]["rule"], detection["metadata"]["ruleId"], detection["metadata"]["versionTime"]))
       for detection in detections
@@ -231,7 +231,7 @@ def slack_webhook_detections(detection_batch):
     report_string = "\n".join(report_lines)
     requests.post(WEBHOOK_URL, json={"text": report_string})
   else:
-    # Output each detections's metadata (Rule and Operation IDs), and its UDM event.
+    # Output each detections's metadata (rule name, RuleId, and VersionTime), and its UDM event.
     report_lines.append("UDM events from detections are listed below:")
     for idx, detection in enumerate(detections):
       report_lines.append("{}) from Rule `{}` (ID `{}`, Version Time `{}`)".format(
