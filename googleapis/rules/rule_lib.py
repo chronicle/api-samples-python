@@ -264,6 +264,13 @@ class RuleLib():
               "versionTime": "2020-09-08T20:34:19.543407Z"
             },
             "detectionInfo": {
+              # The 'fields' key will be omitted for single-event rules.
+              "fields": [
+                {
+                  "name": "match_variable",
+                  "stringVal": "10.142.0.51"
+                }
+              ],
               "timeWindow": {
                 "startTime": "2020-09-08T19:04:09.881104Z",
                 "endTime": "2020-09-08T19:04:09.881104Z"
