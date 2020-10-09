@@ -33,6 +33,6 @@ If you want to directly use `rule_lib.py`, you will have to install the google
 API dependency:
 
 ```
-$ pip3 install google-api-client
+$ pip3 install google-api-python-client
 ```
 
