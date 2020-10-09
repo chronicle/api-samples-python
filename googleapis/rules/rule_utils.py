@@ -13,15 +13,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-# Lint as: python3
-"""Utility functions for use in rule_lib.
+"""Utility functions for use in the rule_lib module.
 
 Chronicle customers should treat these functions as black boxes.
 The function definitions and behaviors will not change, so the customer
 should not be impacted if the implementation details change.
-
-These utils are for python3.
 """
 
 import json
@@ -59,6 +55,7 @@ def parse_stream(response):
       json_string = "{" + line.split("{", 1)[1].rsplit("}", 1)[0] + "}"
 
       yield json.loads(json_string)
+
   except Exception as e:
     # Chronicle's servers will generally send a {"error": ...} dict over the
     # stream to indicate retryable failures (e.g. due to periodic internal

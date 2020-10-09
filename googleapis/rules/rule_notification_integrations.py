@@ -13,23 +13,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-# Lint as: python3
 """Examples of integrations with other products.
 
 Upon receiving rule notifications from stream_rule_notifications, the customers
 will likely want to integrate with other platforms.
 Examples of such integrations are below.
-
-
-These examples are for python3.
 """
 
 import collections
+import datetime
 import json
-import logging
 import requests
-from datetime import datetime
 
 # WEBHOOK_URL is used for chat ops integrations. The example shown below
 # features slack webhooks, but will also work with google chat webhooks.
@@ -58,17 +52,14 @@ NOTIFICATIONS_PER_WEBHOOK_MESSAGE = 3
 
 
 def _print_batch(batch, key):
-  """Print a batch of elements.
+  """Prints a batch of elements.
 
   Args:
     batch: If there is something to print, it will be in batch[key]. A
       continuation time will be in batch["continuationTime"].
     key: The key into the batch dict where the list of elements are.
-
-  Returns:
-    None
   """
-  time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+  time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
   if key in batch and batch[key]:
     print("[{}] Received new {}.".format(time, key))
     print(json.dumps(batch, indent="  "))
@@ -77,29 +68,23 @@ def _print_batch(batch, key):
 
 
 def print_notifications(notification_batch):
-  """Print a set of notifications.
+  """Prints a set of notifications.
 
   Args:
     notification_batch: Contains a list of notifications in
       notification_batch["notifications"] if notifications are present, and a
       continuation time in notification_batch["continuationTime"].
-
-  Returns:
-    None
   """
   _print_batch(notification_batch, "notifications")
 
 
 def print_detections(detection_batch):
-  """Print a set of detections.
+  """Prints a set of detections.
 
   Args:
     detection_batch: Contains a list of detections in
       detection_batch["detections"] if detections are present, and a
       continuation time in detection_batch["continuationTime"].
-
-  Returns:
-    None
   """
   _print_batch(detection_batch, "detections")
 
@@ -115,13 +100,11 @@ def slack_webhook_notifications(notification_batch):
     notification_batch: Contains a list of notifications in
       notification_batch["notifications"] if notifications are present, and a
       continuation time in notification_batch["continuationTime"].
-
-  Returns:
-    None
   """
   if not WEBHOOK_URL:
     return
-  if "notifications" not in notification_batch or not notification_batch["notifications"]:
+  if "notifications" not in notification_batch or not notification_batch[
+      "notifications"]:
     return
 
   notifications = notification_batch["notifications"]
@@ -130,8 +113,8 @@ def slack_webhook_notifications(notification_batch):
 
   report_lines = []
   report_lines.append(
-      "Got stream response with continuationTime {}, containing {} notifications."
-      .format(continuation_time, batch_size))
+      f"Got stream response with continuationTime {continuation_time}, " +
+      f"containing {batch_size} notifications.")
 
   # Aggregate by each (Rule/Operation), and list the count of
   # associated notifications. Recall that the server's notifications
@@ -152,15 +135,17 @@ def slack_webhook_notifications(notification_batch):
   if batch_size > MAX_BATCH_SIZE_TO_REPORT_IN_DETAIL:
     # Avoid flooding our output channels.
     report_lines.append(
-        "Omitting UDM events because more than {} total notifications were received."
-        .format(MAX_BATCH_SIZE_TO_REPORT_IN_DETAIL))
+        "Omitting UDM events because more than " +
+        f"{MAX_BATCH_SIZE_TO_REPORT_IN_DETAIL} total notifications were " +
+        "received.")
     report_lines.append("To get results for an operation listed above, "
                         "call list_results and pass in that operation.")
     report_lines.append("")
     report_string = "\n".join(report_lines)
     requests.post(WEBHOOK_URL, json={"text": report_string})
   else:
-    # Output each notification's metadata (Rule and Operation IDs), and its UDM event.
+    # Output each notification's metadata (Rule and Operation IDs),
+    # and its UDM event.
     report_lines.append("UDM events from notifications are listed below:")
     for idx, notif in enumerate(notifications):
       report_lines.append("{}) from Rule `{}` (`{}`), Operation `{}`".format(
@@ -177,8 +162,9 @@ def slack_webhook_notifications(notification_batch):
 
         requests.post(WEBHOOK_URL, json={"text": report_string})
 
+
 def slack_webhook_detections(detection_batch):
-  """Process one detection batch from stream_rule_detections.
+  """Processes one detection batch from stream_rule_detections.
 
   Forms a textual report to summarize detections and then sends the report to
   a slack webhook. This function requires WEBHOOK_URL to be set. Otherwise it
@@ -188,9 +174,6 @@ def slack_webhook_detections(detection_batch):
     detection_batch: Contains a list of detections in
       detection_batch["detections"] if detections are present, and a
       continuation time in detection_batch["continuationTime"].
-
-  Returns:
-    None
   """
   if not WEBHOOK_URL:
     return
@@ -214,10 +197,11 @@ def slack_webhook_detections(detection_batch):
   # detection_metadatas is a list of the metadata (i.e., rule name, RuleId, and
   # VersionTime) from all the detections.
   detection_metadatas = [
-      tuple((detection["metadata"]["rule"], detection["metadata"]["ruleId"], detection["metadata"]["versionTime"]))
-      for detection in detections
+      tuple((detection["metadata"]["rule"], detection["metadata"]["ruleId"],
+             detection["metadata"]["versionTime"])) for detection in detections
   ]
-  for detection_metadata, count in collections.Counter(detection_metadatas).items():
+  for detection_metadata, count in collections.Counter(
+      detection_metadatas).items():
     report_lines.append(
         "\t{} detections from Rule `{}` (ID `{}`, Version Time `{}`)".format(
             count, detection_metadata[0], detection_metadata[1],
@@ -232,12 +216,15 @@ def slack_webhook_detections(detection_batch):
     report_string = "\n".join(report_lines)
     requests.post(WEBHOOK_URL, json={"text": report_string})
   else:
-    # Output each detections's metadata (rule name, RuleId, and VersionTime), and its UDM event.
+    # Output each detections's metadata (rule name, RuleId, and VersionTime),
+    # and its UDM event.
     report_lines.append("UDM events from detections are listed below:")
     for idx, detection in enumerate(detections):
-      report_lines.append("{}) from Rule `{}` (ID `{}`, Version Time `{}`)".format(
-          idx, detection["metadata"]["rule"], detection["metadata"]["ruleId"],
-          detection["metadata"]["versionTime"]))
+      report_lines.append(
+          "{}) from Rule `{}` (ID `{}`, Version Time `{}`)".format(
+              idx, detection["metadata"]["rule"],
+              detection["metadata"]["ruleId"],
+              detection["metadata"]["versionTime"]))
       report_lines.append("```{}```".format(
           json.dumps(detection["detectionInfo"], indent="\t")))
 

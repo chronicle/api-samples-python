@@ -13,12 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-# Lint as: python3
-"""Library for accessing backstory"s Rules API.
-
-This library is for python3.
-"""
+"""Library for accessing the Chronicle Rules API."""
 
 import json
 import logging
@@ -29,8 +24,7 @@ import sys
 import time
 import urllib
 
-# Imports required for the sample - Google Auth and API Client Library
-# Imports.
+# Imports required for the sample - Google Auth and API Client Library Imports.
 # Get these packages from https://pypi.org/project/google-api-python-client/
 # or run $ pip install google-api-python-client from your terminal.
 from googleapiclient import _auth
@@ -47,25 +41,25 @@ API_URL = "https://backstory.googleapis.com/v1"
 
 
 class RuleLib():
-  """A wrapper library for the rules engine API.
+  """Wrapper library for the rules engine API.
 
-  The url used is logged at the INFO level.
+  The URL used is logged at the INFO level.
   """
 
   def __init__(self):
     self.backstory_api_url = API_URL
-    self.client, self.service_account_credentials = self._create_authenticated_http_client()
+    self.client, self.service_account_credentials = (
+        self._create_authenticated_http_client())
 
   def _create_authenticated_http_client(self):
-    """Create the http client using local credential file storing oauth json."""
-    # Constants
+    """Creates HTTP client using local credential file storing OAuth JSON."""
+    # Constants.
     scopes = ["https://www.googleapis.com/auth/chronicle-backstory"]
     # Or the location you placed your JSON file.
     service_account_file = os.path.abspath(
         os.path.join(os.environ["HOME"], "bk_credentials.json"))
     if not os.path.exists(service_account_file):
-      raise ValueError(
-          "missing service account file: %s" % service_account_file)
+      raise ValueError(f"missing service account file: {service_account_file}")
 
     # Create a credential using Google Developer Service Account Credential and
     # Backstory API Scope.
@@ -76,16 +70,16 @@ class RuleLib():
     return _auth.authorized_http(credentials), credentials
 
   def _parse_response(self, resp):
-    """Print the request url & response/error returned by the http client.
+    """Prints the request URL & response/error returned by the HTTP client.
 
     Args:
-      resp: the http response returned by the http client.
+      resp: HTTP response returned by the HTTP client.
 
     Returns:
-       result as a python object.
+       Result as an object.
 
     Raises:
-      ValueError - problem with the request or the conversion to python object.
+      ValueError: Problem with the request or the conversion to an object.
     """
     # The response is a tuple where:
     #   resp[0] is a python dictionary with information about the
@@ -98,7 +92,7 @@ class RuleLib():
 
     rpc_obj = json.loads(rpc_json)
     # If the response shows success...
-    if  200 <= transport.status < 300:
+    if 200 <= transport.status < 300:
       return rpc_obj
 
     # Otherwise, something went wrong.
@@ -109,10 +103,9 @@ class RuleLib():
     raise ValueError(("problem with rpc call", rpc_obj, transport))
 
   def _stream(self, continuation_time, url, integrations):
-    """Call the streaming RPC in a retry loop with exponential backoff.
+    """Calls the streaming RPC in a retry loop with exponential backoff.
 
-    Processes a stream of batches.
-    A batch is a dictionary.
+    Processes a stream of batches. A batch is a dictionary.
 
     A batch might have the key "error"; if it does, you should retry connecting
     with exponential backoff.
@@ -126,20 +119,17 @@ class RuleLib():
     a list of notifications or alerts from Rules Engine.
 
     Args:
-      continuation_time: A string containing a time in rfc3339 format, to
-        request all notifications created at or after a time; can be omitted to
-        request notifications created at or after the current time.
-      url: A string representing the URL endpoint.
-      integrations: A list of functions that integrate the stream results with
+      continuation_time: String containing a time in RFC 3339 format, to request
+        all notifications created at or after a time; can be omitted to request
+        notifications created at or after the current time.
+      url: String representing the URL endpoint.
+      integrations: List of functions that integrate the stream results with
         other platforms. These functions must have one argument, a dict
         containing a batch from parse_stream.
 
-    Returns:
-      None
-
     Raises:
-      RuntimeError - Hit retry limit after multiple consecutive failures
-        without success
+      RuntimeError: Hit retry limit after multiple consecutive failures
+        without success.
     """
     # Our retry loop uses exponential backoff. For simplicity, we retry for all
     # types of errors, which is fine because we've set a retry limit.
@@ -147,9 +137,8 @@ class RuleLib():
     consecutive_failures = 0
     while True:
       if consecutive_failures > max_consecutive_failures:
-        raise RuntimeError(
-            "exiting retry loop. consecutively failed {} times without success"
-            .format(consecutive_failures))
+        raise RuntimeError("exiting retry loop. consecutively failed " +
+                           f"{consecutive_failures} times without success")
 
       if consecutive_failures:
         sleep_duration = 2**consecutive_failures
@@ -172,8 +161,9 @@ class RuleLib():
             "initiated connection to notifications stream with request: %s",
             data)
         if response.status_code != 200:
-          disconnection_reason = "connection refused with status={}, error={}".format(
-              response.status_code, response.text)
+          disconnection_reason = (
+              "connection refused with " +
+              f"status={response.status_code}, error={response.text}")
         else:
           for batch in rule_utils.parse_stream(response):
             if not batch:
@@ -202,7 +192,7 @@ class RuleLib():
                      "connection unexpectedly closed")
 
   def stream_rule_notifications(self, continuation_time):
-    """Call the StreamRuleNotifications RPC in a retry loop with exponential backoff.
+    """Calls StreamRuleNotifications RPC in retry loop with exponential backoff.
 
     The StreamRuleNotifications RPC streams notifications from Rules Engine V1.
 
@@ -226,16 +216,13 @@ class RuleLib():
 
 
     Args:
-      continuation_time: a string containing a time in rfc3339 format, to
-        request all notifications created at or after a time; can be omitted to
-        request notifications created at or after the current time.
-
-    Returns:
-      None
+      continuation_time: String containing a time in RFC 3339 format, to request
+        all notifications created at or after a time; can be omitted to request
+        notifications created at or after the current time.
 
     Raises:
-      RuntimeError - Hit retry limit after multiple consecutive failures
-        without success
+      RuntimeError: Hit retry limit after multiple consecutive failures
+        without success.
     """
     url = "{}/rules:streamRuleNotifications".format(self.backstory_api_url)
     _LOGGER_.info("stream rule notifications: %s ", url)
@@ -245,7 +232,7 @@ class RuleLib():
     ])
 
   def stream_detections(self, continuation_time):
-    """Call the StreamDetections RPC in a retry loop with exponential backoff.
+    """Calls the StreamDetections RPC in a retry loop with exponential backoff.
 
     The StreamDetections RPC streams alerts from Rules Engine V2.
 
@@ -287,16 +274,13 @@ class RuleLib():
 
 
     Args:
-      continuation_time: a string containing a time in rfc3339 format, to
-        request all alerting detections created at or after a time; can be omitted to
+      continuation_time: String containing a time in RFC 3339 format, to request
+        all alerting detections created at or after a time; can be omitted to
         request detections created at or after the current time.
 
-    Returns:
-      None
-
     Raises:
-      RuntimeError - Hit retry limit after multiple consecutive failures
-        without success
+      RuntimeError: Hit retry limit after multiple consecutive failures
+        without success.
     """
     url = "{}/rules:streamDetections".format(self.backstory_api_url)
     _LOGGER_.info("stream detections: %s ", url)
@@ -306,10 +290,10 @@ class RuleLib():
     ])
 
   def get_rule(self, rule_id):
-    r"""Call the GetRule RPC.
+    r"""Calls the GetRule RPC.
 
     Args:
-      rule_id: A rule id string that begins with ru_
+      rule_id: A rule ID string that begins with "ru_".
 
     Returns:
     {
@@ -320,12 +304,12 @@ class RuleLib():
     url = "{}/rules/{}".format(self.backstory_api_url, rule_id)
     _LOGGER_.info("get rule: %s ", url)
 
-    # Make a request
+    # Make a request.
     response = self.client.request(url, "GET")
     return self._parse_response(response)
 
   def list_rules(self):
-    """Call the ListRules RPC.
+    """Calls the ListRules RPC.
 
     Returns:
       {'rules': [
@@ -338,18 +322,18 @@ class RuleLib():
     url = "{}/rules".format(self.backstory_api_url)
     _LOGGER_.info("list rule: %s ", url)
 
-    # Make a request
+    # Make a request.
     response = self.client.request(url, "GET")
     return self._parse_response(response)
 
   def create_rule(self, rule_text):
-    """Call the CreateRule RPC.
+    """Calls the CreateRule RPC.
 
     This function requires the file path (to rule) to be passed in as a command
     line arg, -rp.
 
     Args:
-      rule_text: rule as a string
+      rule_text: Rule as a string.
 
     Returns:
       {'rule': '...rule text...',
@@ -363,10 +347,8 @@ class RuleLib():
     _LOGGER_.info("create rule: %s ", url)
 
     # Construct the post body for the create rule request.
-    body = {
-        "rule.rule": rule_text
-    }
-    # Make a request
+    body = {"rule.rule": rule_text}
+    # Make a request.
     response = self.client.request(
         url,
         method="POST",
@@ -375,13 +357,13 @@ class RuleLib():
     return self._parse_response(response)
 
   def create_rule_path(self, rule_path):
-    """Call the CreateRule RPC.
+    """Calls the CreateRule RPC.
 
     This function requires the file path (to rule) to be passed in as a command
     line arg, -rp.
 
     Args:
-      rule_path: path to the rule to be uploaded
+      rule_path: Path to the rule to be uploaded.
 
     Returns:
       {'rule': '...rule text...',
@@ -396,11 +378,11 @@ class RuleLib():
     return self.create_rule(contents)
 
   def update_rule(self, rule_id, rule_text):
-    """Call the UpdateRule RPC.
+    """Calls the UpdateRule RPC.
 
     Args:
-      rule_id: A rule id string that begins with ru_
-      rule_text: rule as a string
+      rule_id: Rule ID string that begins with "ru_".
+      rule_text: Rule as a string.
 
     Returns:
       {'rule': '...rule text...',
@@ -415,11 +397,8 @@ class RuleLib():
     _LOGGER_.info("update rule: %s ", url)
 
     # Construct the post body for the update rule request.
-    body = {
-        "rule.rule": rule_text,
-        "update_mask.paths": "rule.rule"
-    }
-    # Make a request
+    body = {"rule.rule": rule_text, "update_mask.paths": "rule.rule"}
+    # Make a request.
     response = self.client.request(
         url,
         method="PATCH",
@@ -428,11 +407,11 @@ class RuleLib():
     return self._parse_response(response)
 
   def update_rule_path(self, rule_id, rule_path):
-    """Call the UpdateRule RPC.
+    """Calls the UpdateRule RPC.
 
     Args:
-      rule_id: A rule id string that begins with ru_
-      rule_path: path to the rule to be uploaded
+      rule_id: Rule ID string that begins with "ru_".
+      rule_path: Path to the rule to be uploaded.
 
     Returns:
       {'rule': '...rule text...',
@@ -448,30 +427,30 @@ class RuleLib():
     return self.update_rule(rule_id, contents)
 
   def delete_rule(self, rule_id):
-    """Call the DeleteRule RPC.
+    """Calls the DeleteRule RPC.
 
     Args:
-      rule_id: A rule id string that begins with ru_
+      rule_id: Rule ID string that begins with "ru_".
 
     Returns:
-      An empty python dictionary object.
+      Empty dictionary.
     """
     if not rule_id:
       raise ValueError("Missing rule id")
     url = "{}/rules/{}".format(self.backstory_api_url, rule_id)
     _LOGGER_.info("delete rule: %s ", url)
 
-    # Make a request
+    # Make a request.
     response = self.client.request(url, "DELETE")
     return self._parse_response(response)
 
   def run_rule(self, rule_id, start_time, end_time):
-    """Call the RunRule RPC.
+    """Calls the RunRule RPC.
 
     Args:
-      rule_id: A rule id string that begins with ru_
-      start_time: start time for job in rfc3339 format.
-      end_time: end time for job in rfc3339 format.
+      rule_id: Rule ID string that begins with "ru_".
+      start_time: Start time for job in RFC 3339 format.
+      end_time: End time for job in RFC 3339 format.
 
     Returns:
       {'name': 'operations/rulejob_jo_0440fca2-ff4b-4067-b16a-e8bc2368fc15'}
@@ -484,11 +463,8 @@ class RuleLib():
     _LOGGER_.info("run rule: %s ", url)
 
     # Construct the post body for the create rule request.
-    body = {
-        "event_start_time": start_time,
-        "event_end_time": end_time
-    }
-    # Make a request
+    body = {"event_start_time": start_time, "event_end_time": end_time}
+    # Make a request.
     response = self.client.request(
         url,
         method="POST",
@@ -497,17 +473,16 @@ class RuleLib():
     return self._parse_response(response)
 
   def enable_live_rule(self, rule_id):
-    """Call the EnableLiveRule RPC.
+    """Calls the EnableLiveRule RPC.
 
     Args:
-      rule_id: A rule id string that begins with ru_
+      rule_id: Rule ID string that begins with "ru_".
 
     Returns:
       {'name': 'operations/rulejob_jo_0440fca2-ff4b-4067-b16a-e8bc2368fc15'}
     """
     if not rule_id:
-      raise ValueError(
-          "Missing rule id")
+      raise ValueError("Missing rule ID")
 
     url = "{}/rules/{}:enableLiveRule".format(self.backstory_api_url, rule_id)
     _LOGGER_.info("enable live rule: %s ", url)
@@ -515,7 +490,7 @@ class RuleLib():
     # Construct the post body for the create rule request.
     body = {}
 
-    # Make a request
+    # Make a request.
     response = self.client.request(
         url,
         method="POST",
@@ -524,10 +499,10 @@ class RuleLib():
     return self._parse_response(response)
 
   def list_results(self, operation_id, page_size=0, page_token=""):
-    """Call the ListResults RPC.
+    """Calls the ListResults RPC.
 
     Args:
-      operation_id: an operation id
+      operation_id: Operation ID.
 
     Returns:
       {'results': [
@@ -540,7 +515,7 @@ class RuleLib():
       }
     """
     if not operation_id:
-      raise ValueError("Missing operation id")
+      raise ValueError("Missing operation ID")
     url = "{}/rules_results?name={}&page_size={}&page_token={}".format(
         self.backstory_api_url, operation_id, page_size, page_token)
     _LOGGER_.info("list results: %s ", url)
@@ -549,15 +524,16 @@ class RuleLib():
     return self._parse_response(response)
 
   def get_operation(self, operation_id):
-    """Call the GetOperation RPC.
+    """Calls the GetOperation RPC.
 
     Args:
-      operation_id: an operation id
+      operation_id: Operation ID.
 
     Returns:
       {'done': True,
          'error': {'code': 10, 'message': 'RESULT_LIMIT_REACHED'},
-         'metadata': {'@type': 'type.googleapis.com/chronicle.backstory.v1.RunRuleMetadata',
+         'metadata': {'@type':
+         'type.googleapis.com/chronicle.backstory.v1.RunRuleMetadata',
                       'eventEndTime': '2019-11-25T00:00:00Z',
                       'ruleId': 'ru_d1b69671-10d8-451a-9398-b6a254aa22e0',
                       'eventStartTime': '2019-11-11T17:31:59Z'},
@@ -569,12 +545,12 @@ class RuleLib():
     url = "{}/{}".format(self.backstory_api_url, operation_id)
     _LOGGER_.info("get operations: %s ", url)
 
-    # Make a request
+    # Make a request.
     response = self.client.request(url, "GET")
     return self._parse_response(response)
 
   def list_operations(self):
-    """Call the ListOperations RPC.
+    """Calls the ListOperations RPC.
 
     Sadly, done is only populated if the job is done. Not done needs to be
     inferred. Similar for success which needs to be inferred by a
@@ -584,17 +560,21 @@ class RuleLib():
     Returns:
       [ {'done': True,
          'error': {'code': 10, 'message': 'RESULT_LIMIT_REACHED'},
-         'metadata': {'@type': 'type.googleapis.com/chronicle.backstory.v1.RunRuleMetadata',
+         'metadata': {'@type':
+         'type.googleapis.com/chronicle.backstory.v1.RunRuleMetadata',
                       'eventEndTime': '2019-11-25T00:00:00Z',
                       'ruleId': 'ru_d1b69671-10d8-451a-9398-b6a254aa22e0',
                       'eventStartTime': '2019-11-11T17:31:59Z'},
          'name': 'operations/rulejob_jo_1b6c6267-53ed-4667-819b-a024ea8bfbe2'},
         {'done': True,
-         'metadata': {'@type': 'type.googleapis.com/chronicle.backstory.v1.RunRuleMetadata',
+         'metadata': {'@type':
+         'type.googleapis.com/chronicle.backstory.v1.RunRuleMetadata',
                       'ruleId': 'ru_c76616b8-40dd-4dc7-8b11-c4f7df4c9cef'},
          'name': 'operations/rulejob_jo_2047d71c-28e9-4fbb-adee-2f0847eefd2e',
-         'response': {'@type': 'type.googleapis.com/chronicle.backstory.v1.RunRuleResponse'}},
-        {'metadata': {'@type': 'type.googleapis.com/chronicle.backstory.v1.RunRuleMetadata',
+         'response': {'@type':
+         'type.googleapis.com/chronicle.backstory.v1.RunRuleResponse'}},
+        {'metadata': {'@type':
+        'type.googleapis.com/chronicle.backstory.v1.RunRuleMetadata',
                       'ruleId': 'ru_226616b9-466d-4777-8991-11f7df4c9c44'},
          'name': 'operations/rulejob_jo_2047d71c-28e9-4fbb-adee-2f0847eefd2e'},
         ...
@@ -607,29 +587,28 @@ class RuleLib():
     url = "{}/operations".format(self.backstory_api_url)
     _LOGGER_.info("list operations: %s ", url)
 
-    # Make a request
+    # Make a request.
     response = self.client.request(url, "GET")
     return self._parse_response(response)
 
   def wait_operation(self, operation_id):
-    """Implement a local wait for an operation with GetOperation loop.
+    """Implements a local wait for an operation with GetOperation loop.
 
     Args:
-      operation_id: an operation id
-
-    Returns:
-      None
+      operation_id: Operation ID.
     """
     if not operation_id:
       raise ValueError("Missing operation_id")
-    # Make a request
+    # Make a request.
     sleep, max_sleep = 2, 120
     while True:
       # This raises a ValueError() if there is a problem.
       # We can catch this and throw a different error if that is more
       # compatible with the wait operation call when it is implemented.
       rule = self.get_operation(operation_id)
-      if rule.get("metadata").get("@type") == "type.googleapis.com/chronicle.backstory.v1.EnableLiveRuleMetadata":
+      if rule.get("metadata").get(
+          "@type"
+      ) == "type.googleapis.com/chronicle.backstory.v1.EnableLiveRuleMetadata":
         break
       if rule.get("done", False):
         break
@@ -641,31 +620,31 @@ class RuleLib():
     _LOGGER_.info("Operation completed:\n%s", rule)
 
   def delete_operation(self, operation_id):
-    """Call the DeleteOperation RPC.
+    """Calls the DeleteOperation RPC.
 
     Args:
-      operation_id: an operation id
+      operation_id: Operation ID.
 
     Returns:
-      An empty python dictionary object.
+      Empty dictionary.
     """
     if not operation_id:
       raise ValueError("Missing operation_id")
     url = "{}/{}".format(self.backstory_api_url, operation_id)
     _LOGGER_.info("delete operation: %s ", url)
 
-    # Make a request
+    # Make a request.
     response = self.client.request(url, "DELETE")
     return self._parse_response(response)
 
   def cancel_operation(self, operation_id):
-    """Call the CancelOperation RPC.
+    """Calls the CancelOperation RPC.
 
     Args:
-      operation_id: an operation id
+      operation_id: Operation ID.
 
     Returns:
-      python object
+      Python object.
     """
     if not operation_id:
       raise ValueError("Missing operation_id")
@@ -673,13 +652,14 @@ class RuleLib():
     url = "{}/{}:cancel".format(self.backstory_api_url, operation_id)
     _LOGGER_.info("list results: %s ", url)
 
-    # Make a request
+    # Make a request.
     response = self.client.request(
         url,
         method="POST",
         headers={"Content-type": "application/x-www-form-urlencoded"},
         body=None)
     return self._parse_response(response)
+
 
 if __name__ == "__main__":
   sys.exit("For use as a library. Please import instead.")
