@@ -87,6 +87,7 @@ def list_results(
     url += f"&page_token={page_token}"
 
   response = http_session.request("GET", url)
+  # Expected server response:
   # {
   #   "nextPageToken": "<base64>",
   #   "results": [

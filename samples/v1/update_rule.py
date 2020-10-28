@@ -53,6 +53,7 @@ def update_rule(http_session: requests.AuthorizedSession, existing_rule_id: str,
   body = {"rule": new_rule_content}
 
   response = http_session.request("PATCH", url, json=body)
+  # Expected server response:
   # {
   #   "ruleId": "ru_<UUID>",
   #   "rule": "<rule_content>"

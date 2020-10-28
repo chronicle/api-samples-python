@@ -72,6 +72,7 @@ def run_rule(http_session: requests.AuthorizedSession, rule_id: str,
   }
 
   response = http_session.request("POST", url, json=body)
+  # Expected server response:
   # {
   #   "name": "operations/rulejob_jo_<UUID>"
   # }

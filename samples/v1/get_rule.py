@@ -47,8 +47,8 @@ def get_rule(http_session: requests.AuthorizedSession, rule_id: str) -> str:
     raise ValueError(f"Invalid detection rule ID: '{rule_id}' != 'ru_<UUID>'.")
 
   url = f"{CHRONICLE_API_BASE_URL}/v1/rules/{rule_id}"
-
   response = http_session.request("GET", url)
+  # Expected server response:
   # {
   #   "ruleId": "ru_<UUID>",
   #   "rule": "<rule_content>"

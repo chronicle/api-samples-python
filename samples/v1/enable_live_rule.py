@@ -55,8 +55,8 @@ def enable_live_rule(http_session: requests.AuthorizedSession,
     raise ValueError(f"Invalid detection rule ID: '{rule_id}' != 'ru_<UUID>'.")
 
   url = f"{CHRONICLE_API_BASE_URL}/v1/rules/{rule_id}:enableLiveRule"
-
   response = http_session.request("POST", url)
+  # Expected server response:
   # {
   #   "name": "operations/rulejob_jo_<UUID>"
   # }

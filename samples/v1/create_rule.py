@@ -26,7 +26,7 @@ CHRONICLE_API_BASE_URL = "https://backstory.googleapis.com"
 
 def create_rule(http_session: requests.AuthorizedSession,
                 rule_content: str) -> str:
-  """Creates a new detection rule to search for and return specific logs.
+  """Creates a new detection rule to find matches in logs.
 
   Args:
     http_session: Authorized session for HTTP requests.
@@ -47,6 +47,7 @@ def create_rule(http_session: requests.AuthorizedSession,
   body = {"rule": rule_content}
 
   response = http_session.request("POST", url, json=body)
+  # Expected server response:
   # {
   #   "ruleId": "ru_<UUID>",
   #   "rule": "<rule_content>"

@@ -44,8 +44,9 @@ def delete_rule(http_session: requests.AuthorizedSession, rule_id: str):
     raise ValueError(f"Invalid detection rule ID: '{rule_id}' != 'ru_<UUID>'.")
 
   url = f"{CHRONICLE_API_BASE_URL}/v1/rules/{rule_id}"
-
   response = http_session.request("DELETE", url)
+  # Expected server response:
+  # {}
 
   if response.status_code >= 400:
     print(response.text)

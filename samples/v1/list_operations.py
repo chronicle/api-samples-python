@@ -54,6 +54,7 @@ def list_operations(http_session: requests.AuthorizedSession,
     url += f"?page_size={size_limit}"
 
   response = http_session.request("GET", url)
+  # Expected server response:
   # {
   #   "operations": [
   #     {

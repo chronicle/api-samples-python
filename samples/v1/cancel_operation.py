@@ -59,8 +59,9 @@ def cancel_operation(http_session: requests.AuthorizedSession,
                      "'rulejob_jo_<UUID>'.")
 
   url = f"{CHRONICLE_API_BASE_URL}/v1/operations/{operation_id}:cancel"
-
   response = http_session.request("POST", url)
+  # Expected server response:
+  # {}
 
   if response.status_code >= 400:
     print(response.text)

@@ -113,8 +113,8 @@ def get_operation(http_session: requests.AuthorizedSession,
                      "'rulejob_jo_<UUID>'.")
 
   url = f"{CHRONICLE_API_BASE_URL}/v1/operations/{operation_id}"
-
   response = http_session.request("GET", url)
+  # Expected server response:
   # {
   #   "name": "operations/rulejob_jo_<UUID>",
   #   "metadata": {
