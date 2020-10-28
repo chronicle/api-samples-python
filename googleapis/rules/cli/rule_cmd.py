@@ -33,19 +33,6 @@ import rule_lib
 _LOGGER_ = logging.getLogger(__name__)
 
 ALLOWED_RPCS = [
-    "GetRule",
-    "ListRules",
-    "CreateRule",
-    "UpdateRule",
-    "DeleteRule",
-    "RunRule",
-    "EnableLiveRule",
-    "ListResults",
-    "GetOperation",
-    "ListOperations",
-    "WaitOperation",
-    "DeleteOperation",
-    "CancelOperation",
     "StreamRuleNotifications",
     "StreamDetections",
 ]
@@ -67,34 +54,7 @@ def main():
   res = ""
   rpc = args.rpc
 
-  if rpc == "GetRule":
-    res = rule_wrap.get_rule(args.rule_id)
-  elif rpc == "ListRules":
-    res = rule_wrap.list_rules()
-  elif rpc == "CreateRule":
-    res = rule_wrap.create_rule_path(args.rule_path)
-  elif rpc == "UpdateRule":
-    res = rule_wrap.update_rule_path(args.rule_id, args.rule_path)
-  elif rpc == "DeleteRule":
-    res = rule_wrap.delete_rule(args.rule_id)
-  elif rpc == "RunRule":
-    res = rule_wrap.run_rule(args.rule_id, args.start_time, args.end_time)
-  elif rpc == "EnableLiveRule":
-    res = rule_wrap.enable_live_rule(args.rule_id)
-  elif rpc == "ListResults":
-    res = rule_wrap.list_results(args.operation_id, args.page_size,
-                                 args.page_token)
-  elif rpc == "GetOperation":
-    res = rule_wrap.get_operation(args.operation_id)
-  elif rpc == "ListOperations":
-    res = rule_wrap.list_operations()
-  elif rpc == "WaitOperation":
-    res = rule_wrap.wait_operation(args.operation_id)
-  elif rpc == "DeleteOperation":
-    res = rule_wrap.delete_operation(args.operation_id)
-  elif rpc == "CancelOperation":
-    res = rule_wrap.cancel_operation(args.operation_id)
-  elif rpc == "StreamRuleNotifications":
+  if rpc == "StreamRuleNotifications":
     res = rule_wrap.stream_rule_notifications(args.continuation_time)
   elif rpc == "StreamDetections":
     res = rule_wrap.stream_detections(args.continuation_time)
