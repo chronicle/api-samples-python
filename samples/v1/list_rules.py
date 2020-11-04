@@ -20,7 +20,7 @@ import argparse
 import pprint
 from typing import Mapping, Sequence
 
-import chronicle_auth
+from samples.v1 import chronicle_auth
 from google.auth.transport import requests
 
 CHRONICLE_API_BASE_URL = "https://backstory.googleapis.com"
