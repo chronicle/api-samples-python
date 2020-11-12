@@ -26,11 +26,11 @@ import pprint
 import time
 from typing import Any, Mapping, Sequence
 
-import cancel_operation
-import chronicle_auth
-import get_operation
-import list_results
-import run_rule
+from . import cancel_operation
+from . import chronicle_auth
+from . import get_operation
+from . import list_results
+from . import run_rule
 from google.auth.transport import requests
 
 DEFAULT_SLEEP_SECONDS = 5

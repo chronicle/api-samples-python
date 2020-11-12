@@ -47,5 +47,5 @@ directory of this repository (i.e. the directory which contains this `README.md`
 file):
 
 ```shell
-./samples/v1/<sample_name>.py -h
+python3 -m samples.v1.<sample_name> -h
 ```

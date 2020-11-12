@@ -22,7 +22,7 @@ import re
 from typing import Optional
 
 import dataclasses
-import chronicle_auth
+from . import chronicle_auth
 from google.auth.transport import requests
 
 CHRONICLE_API_BASE_URL = "https://backstory.googleapis.com"

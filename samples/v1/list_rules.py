@@ -20,7 +20,7 @@ import argparse
 import pprint
 from typing import Mapping, Sequence
 
-import chronicle_auth
+from . import chronicle_auth
 from google.auth.transport import requests
 
 CHRONICLE_API_BASE_URL = "https://backstory.googleapis.com"
@@ -75,7 +75,7 @@ if __name__ == "__main__":
   chronicle_auth.add_argument_credentials_file(parser)
   parser.add_argument(
       "-ps",
-      "--page_size",
+      "--size_limit",
       type=int,
       default=0,
       help="maximum number of rules to return (default: 0 = no limit)")
@@ -83,5 +83,5 @@ if __name__ == "__main__":
   args = parser.parse_args()
   session = chronicle_auth.init_session(
       chronicle_auth.init_credentials(args.credentials_file))
-  rules = list_rules(session, args.page_size)
+  rules = list_rules(session, args.size_limit)
   pprint.pprint(rules)

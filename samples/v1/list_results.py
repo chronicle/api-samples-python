@@ -23,7 +23,7 @@ import pprint
 import re
 from typing import Any, Mapping, Optional, Sequence, Tuple
 
-import chronicle_auth
+from . import chronicle_auth
 from google.auth.transport import requests
 
 CHRONICLE_API_BASE_URL = "https://backstory.googleapis.com"

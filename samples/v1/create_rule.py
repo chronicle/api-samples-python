@@ -18,7 +18,7 @@
 
 import argparse
 
-import chronicle_auth
+from . import chronicle_auth
 from google.auth.transport import requests
 
 CHRONICLE_API_BASE_URL = "https://backstory.googleapis.com"
