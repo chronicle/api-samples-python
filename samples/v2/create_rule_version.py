@@ -43,7 +43,7 @@ def create_rule_version(http_session: requests.AuthorizedSession, rule_id: str,
       (response.status_code >= 400).
   """
   url = f"{CHRONICLE_API_BASE_URL}/v2/detect/rules/{rule_id}:createVersion"
-  body = {"rule.ruleText": rule_content}
+  body = {"ruleText": rule_content}
 
   response = http_session.request("POST", url, json=body)
   # Expected server response:

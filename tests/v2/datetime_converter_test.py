@@ -22,17 +22,19 @@ from samples.v2 import datetime_converter
 
 class DatetimeConverterTest(unittest.TestCase):
 
-  def test_iso8601_datetime_utc(self):
-    expected_date_time = datelib.CreateDatetime(
+  def setUp(self):
+    super().setUp()
+    self.date_time = datetime.datetime(
         2020, 11, 5, 0, 0, 0, 0, tzinfo=datetime.timezone.utc)
+
+  def test_iso8601_datetime_utc(self):
+    expected_date_time = self.date_time
     date_time = datetime_converter.iso8601_datetime_utc("2020-11-05T00:00:00Z")
     self.assertEqual(date_time, expected_date_time)
 
   def test_strftime(self):
     expected_date_time_str = "2020-11-05T00:00:00Z"
-    date_time_str = datetime_converter.strftime(
-        datelib.CreateDatetime(
-            2020, 11, 5, 0, 0, 0, 0, tzinfo=datetime.timezone.utc))
+    date_time_str = datetime_converter.strftime(self.date_time)
     self.assertEqual(date_time_str, expected_date_time_str)
 
 

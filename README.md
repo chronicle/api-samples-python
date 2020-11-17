@@ -49,3 +49,7 @@ file):
 ```shell
 python3 -m samples.v1.<sample_name> -h
 ```
+
+```shell
+python3 -m samples.v2.<sample_name> -h
+```
