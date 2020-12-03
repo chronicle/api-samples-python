@@ -79,7 +79,7 @@ def list_detections(
   response = http_session.request("GET", url, params=params)
   # Expected server response:
   # {
-  #   "collections": [
+  #   "detections": [
   #     {
   #       "id": "de_<UUID>",
   #       "type": "RULE_DETECTION",
@@ -123,7 +123,7 @@ def list_detections(
     print(response.text)
   response.raise_for_status()
   json = response.json()
-  return json.get("collections", []), json.get("nextPageToken", "")
+  return json.get("detections", []), json.get("nextPageToken", "")
 
 
 if __name__ == "__main__":

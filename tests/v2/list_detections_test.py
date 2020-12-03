@@ -60,7 +60,7 @@ class ListDetectionsTest(unittest.TestCase):
     }
     expected_page_token = "page token here"
     mock_response.json.return_value = {
-        "collections": [expected_detection],
+        "detections": [expected_detection],
         "nextPageToken": expected_page_token,
     }
 
