@@ -77,7 +77,15 @@ def get_detection(http_session: requests.AuthorizedSession, version_id: str,
   #       "ruleId": "ru_<UUID>",
   #       "ruleName": "<rule_name>",
   #       "ruleVersion": "ru_<UUID>@v_<seconds>_<nanoseconds>",
-  #       "urlBackToProduct": <URL>,
+  #       "urlBackToProduct": "<URL>",
+  #       "alertState": "ALERTING"/"NOT_ALERTING",
+  #       "ruleType": "SINGLE_EVENT"/"MULTI_EVENT",
+  #       "detectionFields": [
+  #         {
+  #           "key": "<field name>",
+  #           "value": "<field value>"
+  #         }
+  #       ]
   #     },
   #   ],
   # }

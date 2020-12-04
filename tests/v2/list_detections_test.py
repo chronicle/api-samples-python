@@ -55,6 +55,14 @@ class ListDetectionsTest(unittest.TestCase):
                 "ruleName": "rule content",
                 "ruleVersion": version_id,
                 "urlBackToProduct": "https://chronicle.security",
+                "alertState": "ALERTING",
+                "ruleType": "MULTI_EVENT",
+                "detectionFields": [
+                    {
+                        "key": "fieldName",
+                        "value": "fieldValue",
+                    }
+                ]
             }
         ],
     }
