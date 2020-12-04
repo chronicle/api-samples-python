@@ -43,7 +43,7 @@ def get_detection(http_session: requests.AuthorizedSession, version_id: str,
       (response.status_code >= 400).
   """
   url = (f"{CHRONICLE_API_BASE_URL}/v2/detect/rules/{version_id}/" +
-         f"detection/{detection_id}")
+         f"detections/{detection_id}")
 
   response = http_session.request("GET", url)
   # Expected server response:
