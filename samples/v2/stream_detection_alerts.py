@@ -395,7 +395,8 @@ def stream_detection_alerts(
         # a non-heartbeat detection batch.
         continuation_time = batch["continuationTime"]
         if "detections" not in batch:
-          _LOGGER_.info("Got a new continuation time, no detections")
+          _LOGGER_.info("Got a new continuationTime=%s, no detections",
+                        continuation_time)
           continue
         else:
           _LOGGER_.info("Got detection batch with continuationTime=%s",
