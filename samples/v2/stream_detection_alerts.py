@@ -394,11 +394,16 @@ def stream_detection_alerts(
         # When we reach this line, we have successfully received
         # a non-heartbeat detection batch.
         continuation_time = batch["continuationTime"]
-        _LOGGER_.info("Got detection batch with continuationTime=%s",
-                      continuation_time)
+        if "detections" not in batch:
+          _LOGGER_.info("Got a new continuationTime=%s, no detections",
+                        continuation_time)
+          continue
+        else:
+          _LOGGER_.info("Got detection batch with continuationTime=%s",
+                        continuation_time)
 
         # Process the batch using the callback.
-        detections = batch["detections"] if "detections" in batch else []
+        detections = batch["detections"]
         process_detection_batch_callback((detections, continuation_time))
 
   return (disconnection_reason, continuation_time)
