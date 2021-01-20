@@ -241,7 +241,7 @@ def stream_detection_alerts(
     http_session: google_requests.AuthorizedSession,
     req_data: Mapping[str, Any],
     process_detection_batch_callback: Callable[[DetectionBatch], None],
-) -> Tuple[str, str]:
+) -> Tuple[int, str, str]:
   """Makes one call to stream_detection_alerts, and runs until disconnection.
 
   Each call to stream_detection_alerts streams all detection alerts found after
@@ -342,13 +342,14 @@ def stream_detection_alerts(
       single detection batch. (e.g. to integrate with other platforms)
 
   Returns:
-    Tuple containing (disconnection reason, continuation time string received
-    in most recent non-heartbeat detection batch or empty string if no such
-    non-heartbeat detection batch was received).
-
+    Tuple containing (HTTP response status code from connection attempt,
+    disconnection reason, continuation time string received in most recent
+    non-heartbeat detection batch or empty string if no such non-heartbeat
+    detection batch was received).
   """
   url = f"{CHRONICLE_API_BASE_URL}/v2/detect/rules:streamDetectionAlerts"
 
+  response_code = 0
   disconnection_reason = ""
   continuation_time = ""
 
@@ -373,6 +374,7 @@ def stream_detection_alerts(
     _LOGGER_.info(
         "Initiated connection to detection alerts stream with request: %s",
         req_data)
+    response_code = response.status_code
     if response.status_code != 200:
       disconnection_reason = (
           "connection refused with " +
@@ -406,7 +408,7 @@ def stream_detection_alerts(
         detections = batch["detections"]
         process_detection_batch_callback((detections, continuation_time))
 
-  return (disconnection_reason, continuation_time)
+  return (response_code, disconnection_reason, continuation_time)
 
 
 def stream_detection_alerts_in_retry_loop(
@@ -432,8 +434,7 @@ def stream_detection_alerts_in_retry_loop(
       without success.
 
   """
-  continuation_time = "" if not initial_continuation_time else datetime_converter.strftime(
-      initial_continuation_time)
+  continuation_time = datetime_converter.strftime(initial_continuation_time)
 
   # Our retry loop uses exponential backoff with a retry limit.
   # For simplicity, we retry for all types of errors.
@@ -459,20 +460,28 @@ def stream_detection_alerts_in_retry_loop(
         chronicle_auth.init_credentials(credentials_file))
 
     # This function runs until disconnection.
-    disconnection_reason, most_recent_continuation_time = stream_detection_alerts(
+    response_code, disconnection_reason, most_recent_continuation_time = stream_detection_alerts(
         session, req_data, process_detection_batch_callback)
 
     if most_recent_continuation_time:
       consecutive_failures = 0
       continuation_time = most_recent_continuation_time
     else:
+      _LOGGER_.info(disconnection_reason
+                    if disconnection_reason
+                    else "connection unexpectedly closed")
+
+      # Do not retry if the disconnection was due to invalid arguments.
+      # We assume a disconnection was due to invalid arguments if the connection
+      # was refused with HTTP status code 400.
+      if response_code == 400:
+        raise RuntimeError("exiting retry loop. connection refused " +
+                           f"due to invalid arguments {req_data}")
+
       consecutive_failures += 1
       # Do not update continuation_time because the connection immediately
       # failed without receiving any non-heartbeat detection batches.
       # Retry with the same connection request as before.
-
-    _LOGGER_.info(disconnection_reason
-                  if disconnection_reason else "connection unexpectedly closed")
 
 
 if __name__ == "__main__":
