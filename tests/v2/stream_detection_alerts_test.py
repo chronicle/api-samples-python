@@ -32,8 +32,8 @@ class StreamDetectionAlertsTest(unittest.TestCase):
   def test_http_error(self, mock_session, mock_init_session,
                       mock_init_credentials, mock_sleep):
     mock_init_session.return_value = mock_session
-    # Mock a streaming connection failure.
-    mock_session.post.return_value.__enter__.return_value.status_code = 400
+    # Mock a streaming connection failure with a non-400 status code.
+    mock_session.post.return_value.__enter__.return_value.status_code = 429
 
     # Prepare string representations of detection batches that can
     # passed to callback functions.
@@ -42,9 +42,9 @@ class StreamDetectionAlertsTest(unittest.TestCase):
     ]
     detection_batch_dumps = []
     for batch in mock_detection_batches:
-      detection_batch_dumps.append("{" +
-                                   '"continuationTime": "{}"'.format(batch[1]) +
-                                   "}")
+      detection_batch_dumps.append(
+          f'{{"continuationTime": "{batch[1]}",' +
+          f' "detections": {json.dumps(batch[0])}}}')
 
     # Make the streamed responses from response.iter_lines() return our
     # detection batches.
@@ -75,6 +75,60 @@ class StreamDetectionAlertsTest(unittest.TestCase):
 
     # The retry loop should have ran more than once before exiting.
     self.assertGreater(mock_sleep.call_count, 1)
+
+  @mock.patch("time.sleep", return_value=None)
+  @mock.patch("samples.v2.chronicle_auth.init_credentials")
+  @mock.patch("samples.v2.chronicle_auth.init_session")
+  @mock.patch.object(requests, "AuthorizedSession", autospec=True)
+  def test_invalidargs_http_error(self, mock_session, mock_init_session,
+                                  mock_init_credentials, mock_sleep):
+    mock_init_session.return_value = mock_session
+    # Mock a streaming connection failure with a 400 status code.
+    # This indicates that invalid arguments were passed to the sample.
+    mock_session.post.return_value.__enter__.return_value.status_code = 400
+
+    # Prepare string representations of detection batches that can
+    # passed to callback functions.
+    mock_detection_batches = [
+        tuple(([], "2020-12-08T22:39:55.633014925Z")),
+    ]
+    detection_batch_dumps = []
+    for batch in mock_detection_batches:
+      detection_batch_dumps.append(
+          f'{{"continuationTime": "{batch[1]}",' +
+          f' "detections": {json.dumps(batch[0])}}}')
+
+    # Make the streamed responses from response.iter_lines() return our
+    # detection batches.
+    mock_session.post.return_value.__enter__.return_value.iter_lines.side_effect = [
+        detection_batch_dumps,
+    ]
+
+    # Track how many times the callback functions get called.
+    callback_count = 0
+
+    def mock_callback(_):
+      nonlocal callback_count
+      callback_count += 1
+
+    # Call stream_detection_alerts, using our mock callback.
+    # RuntimeError occurs when connection immediately fails with 400 status
+    # code.
+    with self.assertRaises(RuntimeError):
+      stream_detection_alerts.stream_detection_alerts_in_retry_loop(
+          "credentials_file", mock_callback)
+
+    # The callback function should never get called, because the
+    # mocked connection always fails in this test case.
+    self.assertEqual(0, callback_count)
+
+    # Credentials should have been initialized exactly once,
+    # since the retry loop only should have ran once before exiting.
+    self.assertEqual(mock_init_credentials.call_count, 1)
+
+    # No sleeps should have occurred, since no retries should have
+    # occurred.
+    self.assertEqual(mock_sleep.call_count, 0)
 
   @mock.patch("time.sleep", return_value=None)
   @mock.patch("samples.v2.chronicle_auth.init_credentials")
@@ -154,8 +208,8 @@ class StreamDetectionAlertsTest(unittest.TestCase):
       # Desired string format of the detection batch dump:
       #   {"continuationTime": "<continuation time>", "detections": [<list>]}
       detection_batch_dumps.append(
-          "{" + '"continuationTime": "{}",'.format(batch[1]) +
-          '"detections": {}'.format(json.dumps(batch[0])) + "}")
+          f'{{"continuationTime": "{batch[1]}",' +
+          f' "detections": {json.dumps(batch[0])}}}')
 
       # Add empty heartbeats in between batches, which will NOT be
       # passed to the callback, which is why we do not put these into
