@@ -40,7 +40,9 @@ def list_detections(
 
   Args:
     http_session: Authorized session for HTTP requests.
-    version_id: The specific rule version to list detections for.
+    version_id: Unique ID of the detection rule to retrieve errors for
+      ("ru_<UUID>" or "ru_<UUID>@v_<seconds>_<nanoseconds>"). If a version
+      suffix isn't specified we use the rule's latest version.
     page_size: Maximum number of results in the response. Must be non-negative.
       Optional - uses a server-side limit by default.
     page_token: Base64-encoded string token to retrieve a specific page of
@@ -70,8 +72,7 @@ def list_detections(
       ("page_token", page_token),
       ("detection_start_time",
        datetime_converter.strftime(detection_start_time)),
-      ("detection_end_time",
-       datetime_converter.strftime(detection_end_time)),
+      ("detection_end_time", datetime_converter.strftime(detection_end_time)),
       ("alert_state", alert_state),
   ]
   params = {k: v for k, v in params_list if v}

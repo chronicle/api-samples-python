@@ -32,7 +32,9 @@ def get_detection(http_session: requests.AuthorizedSession, version_id: str,
 
   Args:
     http_session: Authorized session for HTTP requests.
-    version_id: The specific rule version to get detection for.
+    version_id: Unique ID of the detection rule to retrieve errors for
+      ("ru_<UUID>" or "ru_<UUID>@v_<seconds>_<nanoseconds>"). If a version
+      suffix isn't specified we use the rule's latest version.
     detection_id: Id of the detection to get information for.
 
   Returns:
