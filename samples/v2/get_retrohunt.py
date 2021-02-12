@@ -57,7 +57,7 @@ def get_retrohunt(http_session: requests.AuthorizedSession,
   #   "eventStartTime": "yyyy-mm-ddThh:mm:ss.ssssssZ",
   #   "eventEndTime": "yyyy-mm-ddThh:mm:ss.ssssssZ",
   #   "retrohuntStartTime": "yyyy-mm-ddThh:mm:ss.ssssssZ",
-  #   "retrohuntEndTime": "yyyy-mm-ddThh:mm:ss.ssssssZ" <-- IFF completed.
+  #   "retrohuntEndTime": "yyyy-mm-ddThh:mm:ss.ssssssZ" <- only if completed.
   #   "state": "RUNNING"/"DONE"/"CANCELLED",
   #   "progressPercentage": <value from 0.00 to 100.00>
   # }

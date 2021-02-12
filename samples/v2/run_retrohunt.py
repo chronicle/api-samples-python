@@ -24,6 +24,7 @@ from typing import Any, Mapping
 from google.auth.transport import requests
 
 from . import chronicle_auth
+from . import datetime_converter
 
 CHRONICLE_API_BASE_URL = "https://backstory.googleapis.com"
 

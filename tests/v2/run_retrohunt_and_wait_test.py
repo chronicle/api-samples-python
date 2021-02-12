@@ -18,7 +18,7 @@ import unittest
 from unittest import mock
 
 from google.auth.transport import requests
-from samples.v2 import run_retrohunt_and_wait
+from samples.v2 import run_retrohunt_and_wait as wait
 
 
 class RunRetrohuntAndWaitTest(unittest.TestCase):

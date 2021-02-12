@@ -18,8 +18,8 @@
 
 import argparse
 
-from . import chronicle_auth
 from google.auth.transport import requests
+from . import chronicle_auth
 
 CHRONICLE_API_BASE_URL = "https://backstory.googleapis.com"
 
@@ -30,10 +30,10 @@ def cancel_retrohunt(http_session: requests.AuthorizedSession, version_id: str,
 
   Args:
     http_session: Authorized session for HTTP requests.
-    version_id: Unique ID of the detection rule to retrieve errors for
+    version_id: Unique ID of the detection rule to cancel a retrohunt for
       ("ru_<UUID>" or "ru_<UUID>@v_<seconds>_<nanoseconds>"). If a version
       suffix isn't specified we use the rule's latest version.
-    retrohunt_id: Id of the retrohunt to get information for.
+    retrohunt_id: Id of the retrohunt to cancel.
 
   Raises:
     requests.exceptions.HTTPError: HTTP request resulted in an error

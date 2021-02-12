@@ -28,15 +28,9 @@ from typing import Any, Mapping, Sequence, Tuple
 
 from google.auth.transport import requests
 
-from google3.third_party.chronicle.detection_api.samples.v2 import cancel_retrohunt
-from google3.third_party.chronicle.detection_api.samples.v2 import chronicle_auth
-from google3.third_party.chronicle.detection_api.samples.v2 import datetime_converter
-from google3.third_party.chronicle.detection_api.samples.v2 import get_retrohunt
-from google3.third_party.chronicle.detection_api.samples.v2 import list_detections
-from google3.third_party.chronicle.detection_api.samples.v2 import run_retrohunt
-
 from . import cancel_retrohunt
 from . import chronicle_auth
+from . import datetime_converter
 from . import get_retrohunt
 from . import list_detections
 from . import run_retrohunt
@@ -157,13 +151,13 @@ if __name__ == "__main__":
       "--start_time",
       type=datetime_converter.iso8601_datetime_utc,
       required=True,
-      help="Retrohunt start time in UTC ('yyyy-mm-ddThh:mm:ssZ')")
+      help="Event start time in UTC ('yyyy-mm-ddThh:mm:ssZ')")
   parser.add_argument(
       "-et",
       "--end_time",
       type=datetime_converter.iso8601_datetime_utc,
       required=True,
-      help="Retrohunt end time in UTC ('yyyy-mm-ddThh:mm:ssZ')")
+      help="Event end time in UTC ('yyyy-mm-ddThh:mm:ssZ')")
   parser.add_argument(
       "-ss",
       "--sleep_seconds",
