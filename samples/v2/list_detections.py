@@ -40,9 +40,13 @@ def list_detections(
 
   Args:
     http_session: Authorized session for HTTP requests.
-    version_id: Unique ID of the detection rule to retrieve errors for
-      ("ru_<UUID>" or "ru_<UUID>@v_<seconds>_<nanoseconds>"). If a version
-      suffix isn't specified we use the rule's latest version.
+    version_id: Unique ID of the detection rule to list detections for.
+      Valid version ID formats:
+        Detections for a specific rule version:
+        "ru_<UUID>@v_<seconds>_<nanoseconds>"
+        Detections for the latest version of a rule: "ru_<UUID>"
+        Detections across all versions of a rule: "ru_<UUID>@-"
+        Detections across all rules and all versions: "-"
     page_size: Maximum number of results in the response. Must be non-negative.
       Optional - uses a server-side limit by default.
     page_token: Base64-encoded string token to retrieve a specific page of
@@ -143,7 +147,8 @@ if __name__ == "__main__":
       "--version_id",
       type=str,
       required=True,
-      help="version ID ('ru_<UUID>[@v_<seconds>_<nanoseconds>]')")
+      help=("version ID of the rule to list detections for "
+            "('- | ru_<UUID>@- | ru_<UUID>[@v_<seconds>_<nanoseconds>]')"))
   parser.add_argument(
       "-s",
       "--page_size",
