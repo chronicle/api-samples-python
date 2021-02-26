@@ -23,7 +23,7 @@ As an example, to list your rules:
 
 ```
 # cd to the cli directory
-$ python3 rule_cmd.py ListRules -v
+$ python3 rule_cmd.py StreamRuleNotifications -v
 ```
 
 Also note that both scripts require a credentials file. Specifically, they will
