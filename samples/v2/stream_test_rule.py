@@ -114,8 +114,8 @@ def stream_test_rule(
 
   Each call to stream_test_rule streams all detections/rule execution errors
   found for the given rule and time range. The number of detections streamed
-  back is capped at the given max number of detections. If a max number of
-  detections is not specified, a server-side default is used.
+  is capped at the given number of max results. If a max number of results
+  is not specified, a server-side default is used.
 
   The server sends a stream of bytes, which is interpreted as a list of python
   dictionaries; each dictionary represents one "result."
@@ -213,7 +213,7 @@ def stream_test_rule(
     #   # server-side timeout; otherwise, a connection failure error may be
     #   # streamed back if/when the connection breaks.
     _LOGGER_.info("Initiated connection to test rule stream")
-    if response.status_code != 200:
+    if response.status_code >= 400:
       disconnection_reason = (
           "connection closed with " +
           f"status={response.status_code}, error={response.text}")
@@ -229,8 +229,7 @@ def stream_test_rule(
           # other errors sent back over the stream by checking to see if
           # the error has the RULES_EXECUTION_ERROR category.
           error = result["error"]
-          if ("category" in error and
-              error["category"] == "RULES_EXECUTION_ERROR"):
+          if error.get("category") == "RULES_EXECUTION_ERROR":
             _LOGGER_.info("Got rule execution error")
             res = error
             execution_errors.append(res)
@@ -254,7 +253,7 @@ def test_rule(
     rule_content: str,
     event_start_time: datetime.datetime,
     event_end_time: datetime.datetime,
-    max_detections: int = 0):
+    max_results: int = 0):
   """Calls stream_test_rule once to test rule.
 
   Args:
@@ -263,7 +262,7 @@ def test_rule(
     event_start_time: Start time of the time range of logs to test rule over.
     event_end_time: End time of the time range of logs to test rule over
       (max allowed time range duration is 2 weeks).
-    max_detections: Maximum number of detections to return.
+    max_results: Maximum number of detections to return.
       Must be nonnegative and is capped at a server-side limit of 10,000.
       Optional - if not specified, a server-side default of 1,000 is used.
 
@@ -274,7 +273,7 @@ def test_rule(
       "rule.rule_text": rule_content,
       "start_time": datetime_converter.strftime(event_start_time),
       "end_time": datetime_converter.strftime(event_end_time),
-      "max_results": max_detections
+      "max_results": max_results
   }
 
   dets, errs, disconnection_reason = stream_test_rule(http_session, req_data)
@@ -287,6 +286,7 @@ def test_rule(
   if disconnection_reason:
     raise RuntimeError(f"Connection failed: {disconnection_reason}. Retry "
                        "testing the rule.")
+
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
@@ -312,8 +312,8 @@ if __name__ == "__main__":
       required=True,
       help="event end time in UTC ('yyyy-mm-ddThh:mm:ssZ')")
   parser.add_argument(
-      "-md",
-      "--max_detections",
+      "-mr",
+      "--max_results",
       type=int,
       required=False,
       help="maximum number of detections to stream back")
@@ -322,4 +322,4 @@ if __name__ == "__main__":
   session = chronicle_auth.init_session(
       chronicle_auth.init_credentials(args.credentials_file))
   test_rule(session, args.rule_file.read(), args.event_start_time,
-            args.event_end_time, args.max_detections)
+            args.event_end_time, args.max_results)
