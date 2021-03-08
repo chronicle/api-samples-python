@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-"""Executable and reusable sample for listing detection rules."""
+"""Executable and reusable sample for listing versions of a detection rule."""
 
 import argparse
 import pprint
@@ -38,12 +38,17 @@ def list_rule_versions(
     rule_id: Unique ID of the detection rule to find versions for ("ru_<UUID>").
       It does not accept a version id ("ru_<UUID>@v_<seconds>_<nanoseconds>").
     page_size: Maximum number of rule versions to return.
+      Must be non-negative, and is capped at a server-side limit of 1000.
+      Optional - a server-side default of 100 is used if the size is 0 or a
+      None value.
     page_token: Page token from a previous ListRuleVersions call used for
       pagination.
+      Optional - the first page is retrieved if the token is the empty string
+      or a None value.
 
   Returns:
-    List of rules and a page token for the next page of results, if there are
-    any.
+    List of versions and a page token for the next page of versions, if there
+    are any.
 
   Raises:
     requests.exceptions.HTTPError: HTTP request resulted in an error

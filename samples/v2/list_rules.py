@@ -34,10 +34,15 @@ def list_rules(http_session: requests.AuthorizedSession,
   Args:
     http_session: Authorized session for HTTP requests.
     page_size: Maximum number of rules to return.
+      Must be non-negative, and is capped at a server-side limit of 1000.
+      Optional - a server-side default of 100 is used if the size is 0 or a
+      None value.
     page_token: Page token from a previous ListRules call used for pagination.
+      Optional - the first page is retrieved if the token is the empty string
+      or a None value.
 
   Returns:
-    List of rules and a page token for the next page of results, if there are
+    List of rules and a page token for the next page of rules, if there are
     any.
 
   Raises:

@@ -48,7 +48,9 @@ def list_retrohunts(
       (default = no filter on retrohunt state).
       Optional - retrohunts of all states are returned.
     page_size: Maximum number of retrohunts to return.
-      Optional - users a server-side limit by default.
+      Must be non-negative, and is capped at a server-side limit of 1000.
+      Optional - a server-side default of 100 is used if the size is 0 or a
+      None value.
     page_token: Page token from a previous ListRetrohunts call used for
       pagination.
       Optional - the first page is retrieved if the token is the

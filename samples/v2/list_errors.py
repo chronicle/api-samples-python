@@ -43,18 +43,21 @@ def list_errors(
     error_category: A string that filters which errors are returned by their
       ErrorCategory (i.e. 'RULES_EXECUTION_ERROR')
       (default = no filter on error category).
-    error_start_time: The time to start listing error from, inclusive (default =
-      no min error_start_time).
-    error_end_time: The time to end listing error to, exclusive (default = no
+    error_start_time: The time to start listing errors from, inclusive
+    (default = no min error_start_time).
+    error_end_time: The time to end listing errors to, exclusive (default = no
       max error_end_time).
     version_id: Unique ID of the detection rule to retrieve errors for
       ("ru_<UUID>" or "ru_<UUID>@v_<seconds>_<nanoseconds>"). If a version
       suffix isn't specified, we list errors for all versions of that rule.
     page_size: Maximum number of errors to return.
+      Must be non-negative, and is capped at a server-side limit of 1000
+      (default = server-side default of 100)
     page_token: Page token from a previous ListErrors call used for pagination.
+      If not specified, the first page is returned.
 
   Returns:
-    List of errors and a page token for the next page of results, if there are
+    List of errors and a page token for the next page of errors, if there are
     any.
 
   Raises:

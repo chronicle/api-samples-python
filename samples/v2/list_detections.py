@@ -47,8 +47,10 @@ def list_detections(
         Detections for the latest version of a rule: "ru_<UUID>"
         Detections across all versions of a rule: "ru_<UUID>@-"
         Detections across all rules and all versions: "-"
-    page_size: Maximum number of results in the response. Must be non-negative.
-      Optional - uses a server-side limit by default.
+    page_size: Maximum number of detections in the response.
+      Must be non-negative, and is capped at a server-side limit of 1000.
+      Optional - we use a server-side default of 100 if the size is 0 or a
+      None value.
     page_token: Base64-encoded string token to retrieve a specific page of
       results. Optional - we retrieve the first page if the token is an empty
       string or a None value.
@@ -166,13 +168,13 @@ if __name__ == "__main__":
       "--detection_start_time",
       type=datetime_converter.iso8601_datetime_utc,
       required=False,
-      help="Detection start time in UTC ('yyyy-mm-ddThh:mm:ssZ')")
+      help="detection start time in UTC ('yyyy-mm-ddThh:mm:ssZ')")
   parser.add_argument(
       "-det",
       "--detection_end_time",
       type=datetime_converter.iso8601_datetime_utc,
       required=False,
-      help="Detection end time in UTC ('yyyy-mm-ddThh:mm:ssZ')")
+      help="detection end time in UTC ('yyyy-mm-ddThh:mm:ssZ')")
   parser.add_argument(
       "-a",
       "--alert_state",
