@@ -20,14 +20,15 @@ from unittest import mock
 
 from google.auth.transport import requests
 
+from samples.v2 import chronicle_auth
 from samples.v2 import stream_detection_alerts
 
 
 class StreamDetectionAlertsTest(unittest.TestCase):
 
   @mock.patch("time.sleep", return_value=None)
-  @mock.patch("samples.v2.chronicle_auth.init_credentials")
-  @mock.patch("samples.v2.chronicle_auth.init_session")
+  @mock.patch.object(chronicle_auth, "init_credentials", autospec=True)
+  @mock.patch.object(chronicle_auth, "init_session", autospec=True)
   @mock.patch.object(requests, "AuthorizedSession", autospec=True)
   def test_http_error(self, mock_session, mock_init_session,
                       mock_init_credentials, mock_sleep):
@@ -77,8 +78,8 @@ class StreamDetectionAlertsTest(unittest.TestCase):
     self.assertGreater(mock_sleep.call_count, 1)
 
   @mock.patch("time.sleep", return_value=None)
-  @mock.patch("samples.v2.chronicle_auth.init_credentials")
-  @mock.patch("samples.v2.chronicle_auth.init_session")
+  @mock.patch.object(chronicle_auth, "init_credentials", autospec=True)
+  @mock.patch.object(chronicle_auth, "init_session", autospec=True)
   @mock.patch.object(requests, "AuthorizedSession", autospec=True)
   def test_invalidargs_http_error(self, mock_session, mock_init_session,
                                   mock_init_credentials, mock_sleep):
@@ -131,8 +132,8 @@ class StreamDetectionAlertsTest(unittest.TestCase):
     self.assertEqual(mock_sleep.call_count, 0)
 
   @mock.patch("time.sleep", return_value=None)
-  @mock.patch("samples.v2.chronicle_auth.init_credentials")
-  @mock.patch("samples.v2.chronicle_auth.init_session")
+  @mock.patch.object(chronicle_auth, "init_credentials", autospec=True)
+  @mock.patch.object(chronicle_auth, "init_session", autospec=True)
   @mock.patch.object(requests, "AuthorizedSession", autospec=True)
   def tests_happy_path(self, mock_session, mock_init_session,
                        mock_init_credentials, mock_sleep):
