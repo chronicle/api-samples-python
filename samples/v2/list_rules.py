@@ -71,7 +71,8 @@ def list_rules(http_session: requests.AuthorizedSession,
   #       "liveRuleEnabled": true, <-- IFF a live rule is enabled.
   #       "versionCreateTime": "yyyy-mm-ddThh:mm:ss.ssssssZ",
   #       "compilationState": "SUCCEEDED"/"FAILED",
-  #       "compilationError": "<error_message>" <-- IFF compilation failed.
+  #       "compilationError": "<error_message>", <-- IFF compilation failed.
+  #       "archivedTime": "yyyy-mm-ddThh:mm:ss.ssssssZ", <-- IFF archived.
   #     },
   #     ...
   #   ],
