@@ -26,9 +26,11 @@ from google.auth.transport import requests
 CHRONICLE_API_BASE_URL = "https://backstory.googleapis.com"
 
 
-def list_rules(http_session: requests.AuthorizedSession,
-               page_size: int = 0,
-               page_token: str = "") -> Tuple[Sequence[Mapping[str, Any]], str]:
+def list_rules(
+    http_session: requests.AuthorizedSession,
+    page_size: int = 0,
+    page_token: str = "",
+    archive_state: str = "") -> Tuple[Sequence[Mapping[str, Any]], str]:
   """List detection rules.
 
   Args:
@@ -40,6 +42,8 @@ def list_rules(http_session: requests.AuthorizedSession,
     page_token: Page token from a previous ListRules call used for pagination.
       Optional - the first page is retrieved if the token is the empty string
       or a None value.
+    archive_state: The archive state to filter rules by (i.e. 'ARCHIVED').
+      Optional - if unspecified, only rules with ACTIVE state are returned.
 
   Returns:
     List of rules and a page token for the next page of rules, if there are
@@ -50,7 +54,8 @@ def list_rules(http_session: requests.AuthorizedSession,
       (response.status_code >= 400).
   """
   url = f"{CHRONICLE_API_BASE_URL}/v2/detect/rules"
-  params_list = [("page_size", page_size), ("page_token", page_token)]
+  params_list = [("page_size", page_size), ("page_token", page_token),
+                 ("state", archive_state)]
   params = {k: v for k, v in params_list if v}
 
   response = http_session.request("GET", url, params=params)
@@ -101,10 +106,17 @@ if __name__ == "__main__":
       type=str,
       required=False,
       help="page token from a previous ListRules call used for pagination")
+  parser.add_argument(
+      "-as",
+      "--archive_state",
+      type=str,
+      required=False,
+      help="archive state (i.e. 'ACTIVE', 'ARCHIVED', 'ALL')")
 
   args = parser.parse_args()
   session = chronicle_auth.init_session(
       chronicle_auth.init_credentials(args.credentials_file))
-  rules, next_page_token = list_rules(session, args.page_size, args.page_token)
+  rules, next_page_token = list_rules(session, args.page_size, args.page_token,
+                                      args.archive_state)
   pprint.pprint(rules)
   print(f"Next page token: {next_page_token}")
