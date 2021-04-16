@@ -84,7 +84,7 @@ class Operation:
     self.rule_metadata_type = metadata["@type"]
     self.event_start_time = iso8601_datetime_utc(times[0]) if times[0] else None
     self.event_end_time = iso8601_datetime_utc(times[1]) if times[1] else None
-    self.run_start_time = iso8601_datetime_utc(times[2]) if times[2] else None
+    self.run_start_time = iso8601_datetime_utc(times[2]) if times[2] else None  # pytype: disable=annotation-type-mismatch
     self.run_end_time = iso8601_datetime_utc(times[3]) if times[3] else None
     self.is_done = json.get("done", False)
     self.error_code = json.get("error", {}).get("code")
