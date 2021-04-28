@@ -28,7 +28,7 @@ import sys
 # directory.
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
 
-import rule_lib
+import rule_lib  # noqa pylint: disable=g-import-not-at-top
 
 _LOGGER_ = logging.getLogger(__name__)
 
