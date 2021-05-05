@@ -1,6 +1,6 @@
-# Chronicle Detection API
+# Chronicle API Samples in Python
 
-Python samples and guidelines for using the Chronicle Detection API.
+Python samples and guidelines for using Chronicle APIs.
 
 ## Setup
 
@@ -42,14 +42,22 @@ or
 
 ## Usage
 
-Run this command-line, assuming the current working directory is the root
-directory of this repository (i.e. the directory which contains this `README.md`
-file):
+You can run samples on the command-line, assuming the current working directory
+is the root directory of this repository (i.e. the directory which contains
+this `README.md` file):
+
+### Detect API
 
 ```shell
-python3 -m samples.v1.<sample_name> -h
+python3 -m detect.v1.<sample_name> -h
 ```
 
 ```shell
-python3 -m samples.v2.<sample_name> -h
+python3 -m detect.v2.<sample_name> -h
+```
+
+### Lists API
+
+```shell
+python3 -m lists.<sample_name> -h
 ```
