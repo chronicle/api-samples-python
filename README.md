@@ -2,8 +2,6 @@
 
 Python samples and guidelines for using Chronicle APIs.
 
-temporary change for a pull request. Testing if PRs can be imported by Copybara for new repo
-
 ## Setup
 
 Follow these instructions: https://cloud.google.com/python/setup
@@ -11,7 +9,7 @@ Follow these instructions: https://cloud.google.com/python/setup
 You may skip installing the Cloud Client Libraries and the Cloud SDK, they are
 unnecessary for interacting with Chronicle.
 
-After creating and activating a virtual environment, install Python
+After creating and activating the virtual environment, install Python
 library dependencies by running this command:
 
 ```shell
