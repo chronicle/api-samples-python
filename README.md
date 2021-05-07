@@ -25,7 +25,7 @@ pip install dataclasses
 
 ## Credentials
 
-Running the samples requires a JSON credentials file. By default, all the
+Running the samples requires a JSON credentials file. By default, all
 samples try to use the file `.chronicle_credentials.json` in the user's home
 directory. If this file is not found, you need to specify it explicitly by
 adding the following argument to the sample's command-line:
