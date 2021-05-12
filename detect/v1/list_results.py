@@ -23,8 +23,9 @@ import pprint
 import re
 from typing import Any, Mapping, Optional, Sequence, Tuple
 
-from common import chronicle_auth
 from google.auth.transport import requests
+
+from common import chronicle_auth
 
 CHRONICLE_API_BASE_URL = "https://backstory.googleapis.com"
 
@@ -78,6 +79,10 @@ def list_results(
         raise ValueError(f"Invalid page token: '{page_token}'.")
     except binascii.Error:
       raise ValueError(f"Invalid page token: '{page_token}'.")
+
+  if not OPERATION_ID_PATTERN.fullmatch(operation_id):
+    raise ValueError(f"Invalid detection operation ID: '{operation_id}' != " +
+                     "'rulejob_jo_<UUID>'.")
 
   url = (f"{CHRONICLE_API_BASE_URL}/v1/rules_results?name=operations/" +
          operation_id)
