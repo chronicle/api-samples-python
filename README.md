@@ -42,9 +42,9 @@ or
 
 ## Usage
 
-You can run the samples on the command-line, assuming the current working
-directory is the root directory of this repository (i.e. the directory which
-contains this `README.md` file):
+You can run samples on the command-line, assuming the current working directory
+is the root directory of this repository (i.e. the directory which contains
+this `README.md` file):
 
 ### Detect API
 
