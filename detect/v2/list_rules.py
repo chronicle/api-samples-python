@@ -20,8 +20,9 @@ import argparse
 import pprint
 from typing import Any, Mapping, Sequence, Tuple
 
-from common import chronicle_auth
 from google.auth.transport import requests
+
+from common import chronicle_auth
 
 CHRONICLE_API_BASE_URL = "https://backstory.googleapis.com"
 
@@ -114,8 +115,7 @@ if __name__ == "__main__":
       help="archive state (i.e. 'ACTIVE', 'ARCHIVED', 'ALL')")
 
   args = parser.parse_args()
-  session = chronicle_auth.init_session(
-      chronicle_auth.init_credentials(args.credentials_file))
+  session = chronicle_auth.initialize_http_session(args.credentials_file)
   rules, next_page_token = list_rules(session, args.page_size, args.page_token,
                                       args.archive_state)
   pprint.pprint(rules)

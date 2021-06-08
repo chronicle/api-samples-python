@@ -20,11 +20,9 @@ import argparse
 import datetime
 import json
 import logging
-
 from typing import Any, Iterator, Mapping, Sequence, Tuple
-from google.auth.transport import requests as google_requests
 
-import requests
+from google.auth.transport import requests
 
 from common import chronicle_auth
 from common import datetime_converter
@@ -41,18 +39,19 @@ Result = Mapping[str, Any]
 CHRONICLE_API_BASE_URL = "https://backstory.googleapis.com"
 
 
-def parse_stream(response: requests.Response) -> Iterator[Mapping[str, Any]]:
+def parse_stream(
+    response: requests.requests.Response) -> Iterator[Mapping[str, Any]]:
   """Parses a stream response containing one result.
 
   The requests library provides utilities for iterating over the HTTP stream
   response, so we do not have to worry about chunked transfer encoding. The
-  response is a stream of bytes that represent a json array.
-  Each top-level element of the json array is a result. The server can send a
-  result at any time, thus adding to the json array. The array should end when
+  response is a stream of bytes that represent a JSON array.
+  Each top-level element of the JSON array is a result. The server can send a
+  result at any time, thus adding to the JSON array. The array should end when
   the stream closes.
 
   Args:
-    response: The requests.Response Object returned from post().
+    response: The response object returned from post().
 
   Yields:
     Dictionary representations of each result that was sent over the
@@ -66,9 +65,9 @@ def parse_stream(response: requests.Response) -> Iterator[Mapping[str, Any]]:
       if not line:
         continue
 
-      # Don't try to parse a line as json if it doesn't contain an opening and
+      # Don't try to parse a line as JSON if it doesn't contain an opening and
       # closing brace.
-      # This can happen when no json elements are streamed and the stream
+      # This can happen when no JSON elements are streamed and the stream
       # closes, which is a normal case when testing a rule that doesn't generate
       # any results.
       if len(line.split("{", 1)) < 2 and len(line.rsplit("}", 1)) < 2:
@@ -88,7 +87,7 @@ def parse_stream(response: requests.Response) -> Iterator[Mapping[str, Any]]:
     #
     # In rarer cases, the streaming connection may silently fail; the
     # connection will close without an error dict, which manifests as a
-    # requests.exceptions.ChunkedEncodingError; see
+    # requests.requests.exceptions.ChunkedEncodingError; see
     # https://github.com/urllib3/urllib3/issues/1516 for details from the
     # `requests` and `urllib3` community.
     #
@@ -107,9 +106,9 @@ def parse_stream(response: requests.Response) -> Iterator[Mapping[str, Any]]:
 
 
 def stream_test_rule(
-    http_session: google_requests.AuthorizedSession,
-    req_data: Mapping[str, Any]
-    ) -> Tuple[Sequence[Result], Sequence[Result], str]:
+    http_session: requests.AuthorizedSession,
+    req_data: Mapping[str,
+                      Any]) -> Tuple[Sequence[Result], Sequence[Result], str]:
   """Makes one call to stream_test_rule, and runs until disconnection.
 
   Each call to stream_test_rule streams all detections/rule execution errors
@@ -199,7 +198,7 @@ def stream_test_rule(
   with http_session.post(
       url, stream=True, data=req_data, timeout=180) as response:
     # Expected server response is a continuous stream of
-    # bytes that represent a json array. The parsing
+    # bytes that represent a JSON array. The parsing
     # is handed by parse_stream. See docstring above for
     # formats of detections and rule execution errors.
     #
@@ -248,12 +247,11 @@ def stream_test_rule(
   return (detections, execution_errors, disconnection_reason)
 
 
-def test_rule(
-    http_session: google_requests.AuthorizedSession,
-    rule_content: str,
-    event_start_time: datetime.datetime,
-    event_end_time: datetime.datetime,
-    max_results: int = 0):
+def test_rule(http_session: requests.AuthorizedSession,
+              rule_content: str,
+              event_start_time: datetime.datetime,
+              event_end_time: datetime.datetime,
+              max_results: int = 0):
   """Calls stream_test_rule once to test rule.
 
   Args:
@@ -319,7 +317,6 @@ if __name__ == "__main__":
       help="maximum number of detections to stream back")
 
   args = parser.parse_args()
-  session = chronicle_auth.init_session(
-      chronicle_auth.init_credentials(args.credentials_file))
+  session = chronicle_auth.initialize_http_session(args.credentials_file)
   test_rule(session, args.rule_file.read(), args.event_start_time,
             args.event_end_time, args.max_results)

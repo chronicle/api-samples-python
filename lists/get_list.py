@@ -79,9 +79,6 @@ if __name__ == "__main__":
       help="path of a file to write the list content to, or - for STDOUT")
 
   args = parser.parse_args()
-  session = chronicle_auth.init_session(
-      chronicle_auth.init_credentials(args.credentials_file))
-
+  session = chronicle_auth.initialize_http_session(args.credentials_file)
   list_lines = get_list(session, args.name)
-
   args.list_file.write("\n".join(list_lines) + "\n")

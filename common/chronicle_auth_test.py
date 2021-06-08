@@ -65,8 +65,8 @@ class ChronicleAuthTest(unittest.TestCase):
     os.write(fd, fake_json_credentials.strip() + fake_private_key + b'"\n}\n')
     os.close(fd)
 
-  def test_init_session_with_custom_json_credentials(self):
-    chronicle_auth.init_session(chronicle_auth.init_credentials(self.path))
+  def test_initialize_http_session_with_custom_json_credentials(self):
+    chronicle_auth.initialize_http_session(self.path)
 
   def tearDown(self):
     os.remove(self.path)

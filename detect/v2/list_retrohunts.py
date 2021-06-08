@@ -128,8 +128,7 @@ if __name__ == "__main__":
       help="page token from a previous ListRetrohunts call used for pagination")
 
   args = parser.parse_args()
-  session = chronicle_auth.init_session(
-      chronicle_auth.init_credentials(args.credentials_file))
+  session = chronicle_auth.initialize_http_session(args.credentials_file)
   retrohunts, next_page_token = list_retrohunts(session, args.version_id,
                                                 args.retrohunt_state,
                                                 args.page_size, args.page_token)

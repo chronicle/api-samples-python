@@ -63,6 +63,5 @@ if __name__ == "__main__":
       help="version ID ('ru_<UUID>[@v_<seconds>_<nanoseconds>]')")
 
   args = parser.parse_args()
-  session = chronicle_auth.init_session(
-      chronicle_auth.init_credentials(args.credentials_file))
+  session = chronicle_auth.initialize_http_session(args.credentials_file)
   unarchive_rule(session, args.version_id)

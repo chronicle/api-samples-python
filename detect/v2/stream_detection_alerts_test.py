@@ -27,11 +27,9 @@ from . import stream_detection_alerts
 class StreamDetectionAlertsTest(unittest.TestCase):
 
   @mock.patch("time.sleep", return_value=None)
-  @mock.patch.object(chronicle_auth, "init_credentials", autospec=True)
-  @mock.patch.object(chronicle_auth, "init_session", autospec=True)
+  @mock.patch.object(chronicle_auth, "initialize_http_session", autospec=True)
   @mock.patch.object(requests, "AuthorizedSession", autospec=True)
-  def test_http_error(self, mock_session, mock_init_session,
-                      mock_init_credentials, mock_sleep):
+  def test_http_error(self, mock_session, mock_init_session, mock_sleep):
     mock_init_session.return_value = mock_session
     # Mock a streaming connection failure with a non-400 status code.
     mock_session.post.return_value.__enter__.return_value.status_code = 429
@@ -70,19 +68,18 @@ class StreamDetectionAlertsTest(unittest.TestCase):
     # mocked connection always fails in this test case.
     self.assertEqual(0, callback_count)
 
-    # Credentials should have been initialized more times than
+    # Session should have been initialized more times than
     # the polling loop slept, since the last iteration exits early.
-    self.assertGreater(mock_init_credentials.call_count, mock_sleep.call_count)
+    self.assertGreater(mock_init_session.call_count, mock_sleep.call_count)
 
     # The retry loop should have ran more than once before exiting.
     self.assertGreater(mock_sleep.call_count, 1)
 
   @mock.patch("time.sleep", return_value=None)
-  @mock.patch.object(chronicle_auth, "init_credentials", autospec=True)
-  @mock.patch.object(chronicle_auth, "init_session", autospec=True)
+  @mock.patch.object(chronicle_auth, "initialize_http_session", autospec=True)
   @mock.patch.object(requests, "AuthorizedSession", autospec=True)
   def test_invalidargs_http_error(self, mock_session, mock_init_session,
-                                  mock_init_credentials, mock_sleep):
+                                  mock_sleep):
     mock_init_session.return_value = mock_session
     # Mock a streaming connection failure with a 400 status code.
     # This indicates that invalid arguments were passed to the sample.
@@ -123,20 +120,18 @@ class StreamDetectionAlertsTest(unittest.TestCase):
     # mocked connection always fails in this test case.
     self.assertEqual(0, callback_count)
 
-    # Credentials should have been initialized exactly once,
+    # Session should have been initialized exactly once,
     # since the retry loop only should have ran once before exiting.
-    self.assertEqual(mock_init_credentials.call_count, 1)
+    self.assertEqual(mock_init_session.call_count, 1)
 
     # No sleeps should have occurred, since no retries should have
     # occurred.
     self.assertEqual(mock_sleep.call_count, 0)
 
   @mock.patch("time.sleep", return_value=None)
-  @mock.patch.object(chronicle_auth, "init_credentials", autospec=True)
-  @mock.patch.object(chronicle_auth, "init_session", autospec=True)
+  @mock.patch.object(chronicle_auth, "initialize_http_session", autospec=True)
   @mock.patch.object(requests, "AuthorizedSession", autospec=True)
-  def tests_happy_path(self, mock_session, mock_init_session,
-                       mock_init_credentials, mock_sleep):
+  def tests_happy_path(self, mock_session, mock_init_session, mock_sleep):
     mock_init_session.return_value = mock_session
     # Mock a successful streaming connection.
     mock_session.post.return_value.__enter__.return_value.status_code = 200
@@ -248,9 +243,9 @@ class StreamDetectionAlertsTest(unittest.TestCase):
     # heartbeats do not get passed to the callback.
     self.assertEqual(mock_detection_batches, callback_call_arguments)
 
-    # Credentials should have been initialized more times than
+    # Session should have been initialized more times than
     # the polling loop slept, since the last iteration exits early.
-    self.assertGreater(mock_init_credentials.call_count, mock_sleep.call_count)
+    self.assertGreater(mock_init_session.call_count, mock_sleep.call_count)
 
 
 if __name__ == "__main__":

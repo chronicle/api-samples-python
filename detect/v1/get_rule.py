@@ -19,8 +19,9 @@
 import argparse
 import re
 
-from common import chronicle_auth
 from google.auth.transport import requests
+
+from common import chronicle_auth
 
 CHRONICLE_API_BASE_URL = "https://backstory.googleapis.com"
 
@@ -67,7 +68,6 @@ if __name__ == "__main__":
       "-ri", "--rule_id", type=str, required=True, help="rule ID ('ru_<UUID>')")
 
   args = parser.parse_args()
-  session = chronicle_auth.init_session(
-      chronicle_auth.init_credentials(args.credentials_file))
+  session = chronicle_auth.initialize_http_session(args.credentials_file)
   rule_content = get_rule(session, args.rule_id)
   print(rule_content)

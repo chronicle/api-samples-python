@@ -98,7 +98,6 @@ if __name__ == "__main__":
       help="Event end time in UTC ('yyyy-mm-ddThh:mm:ssZ')")
 
   args = parser.parse_args()
-  session = chronicle_auth.init_session(
-      chronicle_auth.init_credentials(args.credentials_file))
+  session = chronicle_auth.initialize_http_session(args.credentials_file)
   rh = run_retrohunt(session, args.version_id, args.start_time, args.end_time)
   pprint.pprint(rh)

@@ -18,8 +18,8 @@
 
 import argparse
 import pprint
-
 from typing import Any, Mapping
+
 from google.auth.transport import requests
 
 from common import chronicle_auth
@@ -84,7 +84,6 @@ if __name__ == "__main__":
       required=True,
       help="retrohunt ID ('oh_<UUID>')")
   args = parser.parse_args()
-  session = chronicle_auth.init_session(
-      chronicle_auth.init_credentials(args.credentials_file))
+  session = chronicle_auth.initialize_http_session(args.credentials_file)
   retrohunt = get_retrohunt(session, args.version_id, args.retrohunt_id)
   pprint.pprint(retrohunt)

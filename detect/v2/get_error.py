@@ -75,7 +75,6 @@ if __name__ == "__main__":
       required=True,
       help="error ID (for Detect errors: 'ed_<UUID>')")
   args = parser.parse_args()
-  session = chronicle_auth.init_session(
-      chronicle_auth.init_credentials(args.credentials_file))
+  session = chronicle_auth.initialize_http_session(args.credentials_file)
   error = get_error(session, args.error_id)
   pprint.pprint(error)

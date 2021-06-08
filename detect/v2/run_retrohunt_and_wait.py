@@ -178,8 +178,7 @@ if __name__ == "__main__":
       required=False,
       help="maximum number of detections to return")
   args = parser.parse_args()
-  session = chronicle_auth.init_session(
-      chronicle_auth.init_credentials(args.credentials_file))
+  session = chronicle_auth.initialize_http_session(args.credentials_file)
   detections, next_page_token = run_retrohunt_and_wait(
       session, args.version_id, args.start_time, args.end_time,
       args.sleep_seconds, args.timeout_minutes, args.page_size)

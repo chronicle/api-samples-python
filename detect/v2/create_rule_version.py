@@ -19,8 +19,9 @@
 import argparse
 from typing import Any, Mapping
 
-from common import chronicle_auth
 from google.auth.transport import requests
+
+from common import chronicle_auth
 
 CHRONICLE_API_BASE_URL = "https://backstory.googleapis.com"
 
@@ -87,8 +88,7 @@ if __name__ == "__main__":
       help="path of a file with the desired rule's content, or - for STDIN")
 
   args = parser.parse_args()
-  session = chronicle_auth.init_session(
-      chronicle_auth.init_credentials(args.credentials_file))
+  session = chronicle_auth.initialize_http_session(args.credentials_file)
   new_version_id = create_rule_version(session, args.rule_id,
                                        args.rule_file.read())
   print(new_version_id)

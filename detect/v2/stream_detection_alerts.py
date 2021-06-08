@@ -22,11 +22,9 @@ import datetime
 import json
 import logging
 import time
-
 from typing import Any, Callable, Iterator, Mapping, Optional, Sequence, Tuple
-from google.auth.transport import requests as google_requests
 
-import requests
+from google.auth.transport import requests
 
 from common import chronicle_auth
 from common import datetime_converter
@@ -70,18 +68,19 @@ DETECTIONS_PER_WEBHOOK_MESSAGE = 3
 CHRONICLE_API_BASE_URL = "https://backstory.googleapis.com"
 
 
-def parse_stream(response: requests.Response) -> Iterator[Mapping[str, Any]]:
+def parse_stream(
+    response: requests.requests.Response) -> Iterator[Mapping[str, Any]]:
   """Parses a stream response containing one detection batch.
 
   The requests library provides utilities for iterating over the HTTP stream
   response, so we do not have to worry about chunked transfer encoding. The
-  response is a stream of bytes that represent a json array.
-  Each top-level element of the json array is a detection batch. The array is
+  response is a stream of bytes that represent a JSON array.
+  Each top-level element of the JSON array is a detection batch. The array is
   "never ending"; the server can send a batch at any time, thus
-  adding to the json array.
+  adding to the JSON array.
 
   Args:
-    response: The requests.Response Object returned from post().
+    response: The response object returned from post().
 
   Yields:
     Dictionary representations of each detection batch that was sent over the
@@ -109,7 +108,7 @@ def parse_stream(response: requests.Response) -> Iterator[Mapping[str, Any]]:
     #
     # In rarer cases, the streaming connection may silently fail; the
     # connection will close without an error dict, which manifests as a
-    # requests.exceptions.ChunkedEncodingError; see
+    # requests.requests.exceptions.ChunkedEncodingError; see
     # https://github.com/urllib3/urllib3/issues/1516 for details from the
     # `requests` and `urllib3` community.
     #
@@ -195,7 +194,7 @@ def callback_slack_webhook(detection_batch: DetectionBatch):
         " were received.")
     report_lines.append("")
     report_string = "\n".join(report_lines)
-    requests.post(WEBHOOK_URL, json={"text": report_string})
+    requests.requests.post(WEBHOOK_URL, json={"text": report_string})
   else:
     # Output each detections's metadata and its UDM event samples.
     report_lines.append("Detections listed below:")
@@ -224,7 +223,7 @@ def callback_slack_webhook(detection_batch: DetectionBatch):
         report_lines.clear()
         report_lines.append("")
 
-        requests.post(WEBHOOK_URL, json={"text": report_string})
+        requests.requests.post(WEBHOOK_URL, json={"text": report_string})
 
 
 def callback(detection_batch: DetectionBatch):
@@ -238,7 +237,7 @@ def callback(detection_batch: DetectionBatch):
 
 
 def stream_detection_alerts(
-    http_session: google_requests.AuthorizedSession,
+    http_session: requests.AuthorizedSession,
     req_data: Mapping[str, Any],
     process_detection_batch_callback: Callable[[DetectionBatch], None],
 ) -> Tuple[int, str, str]:
@@ -359,7 +358,7 @@ def stream_detection_alerts(
   with http_session.post(
       url, stream=True, data=req_data, timeout=60) as response:
     # Expected server response is a continuous stream of
-    # bytes that represent a never-ending json array. The parsing
+    # bytes that represent a never-ending JSON array. The parsing
     # is handed by parse_stream. See docstring above for
     # formats of detections and detection batches.
     #
@@ -418,7 +417,6 @@ def stream_detection_alerts_in_retry_loop(
 ):
   """Calls stream_detection_alerts and manages state for reconnections.
 
-
   Args:
     credentials_file: Path to credentials file, used to make an authorized
       session for HTTP requests.
@@ -456,8 +454,7 @@ def stream_detection_alerts_in_retry_loop(
 
     # Connections may last hours. Make a new authorized session every retry loop
     # to avoid session expiration.
-    session = chronicle_auth.init_session(
-        chronicle_auth.init_credentials(credentials_file))
+    session = chronicle_auth.initialize_http_session(credentials_file)
 
     # This function runs until disconnection.
     response_code, disconnection_reason, most_recent_continuation_time = stream_detection_alerts(

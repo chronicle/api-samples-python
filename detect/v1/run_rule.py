@@ -20,8 +20,9 @@ import argparse
 import datetime
 import re
 
-from common import chronicle_auth
 from google.auth.transport import requests
+
+from common import chronicle_auth
 
 CHRONICLE_API_BASE_URL = "https://backstory.googleapis.com"
 
@@ -171,7 +172,6 @@ if __name__ == "__main__":
   start_time = args.local_start_time or args.utc_start_time
   end_time = args.local_end_time or args.utc_end_time
 
-  session = chronicle_auth.init_session(
-      chronicle_auth.init_credentials(args.credentials_file))
+  session = chronicle_auth.initialize_http_session(args.credentials_file)
   operation_id = run_rule(session, args.rule_id, start_time, end_time)
   print(operation_id)

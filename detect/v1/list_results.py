@@ -139,8 +139,7 @@ if __name__ == "__main__":
       help="page token (default: none)")
 
   args = parser.parse_args()
-  session = chronicle_auth.init_session(
-      chronicle_auth.init_credentials(args.credentials_file))
+  session = chronicle_auth.initialize_http_session(args.credentials_file)
   results, next_page_token = list_results(session, args.operation_id,
                                           args.page_size, args.page_token)
   pprint.pprint(results)

@@ -20,9 +20,10 @@ import argparse
 import pprint
 from typing import Sequence
 
+from google.auth.transport import requests
+
 from common import chronicle_auth
 from . import get_operation
-from google.auth.transport import requests
 
 CHRONICLE_API_BASE_URL = "https://backstory.googleapis.com"
 
@@ -98,7 +99,6 @@ if __name__ == "__main__":
       help="maximum number of operations to return (default: 0 = no limit)")
 
   args = parser.parse_args()
-  session = chronicle_auth.init_session(
-      chronicle_auth.init_credentials(args.credentials_file))
+  session = chronicle_auth.initialize_http_session(args.credentials_file)
   operations = list_operations(session, args.size_limit)
   pprint.pprint(operations)

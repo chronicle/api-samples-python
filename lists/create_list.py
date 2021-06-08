@@ -90,10 +90,9 @@ if __name__ == "__main__":
       # STDIN example:
       #   cat <path> | python3 -m lists.create_list <other args> -f -
       help="path of a file containing the list content, or - for STDIN")
-  args = parser.parse_args()
-  session = chronicle_auth.init_session(
-      chronicle_auth.init_credentials(args.credentials_file))
 
+  args = parser.parse_args()
+  session = chronicle_auth.initialize_http_session(args.credentials_file)
   new_list_create_time = create_list(session, args.name, args.description,
                                      args.list_file.read().splitlines())
-  print(f"New list created successfully, at time {new_list_create_time}")
+  print(f"New list created successfully, at {new_list_create_time}")

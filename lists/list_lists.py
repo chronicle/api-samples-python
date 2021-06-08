@@ -95,10 +95,7 @@ if __name__ == "__main__":
       help="page token from a previous ListReferenceLists call for pagination")
 
   args = parser.parse_args()
-  session = chronicle_auth.init_session(
-      chronicle_auth.init_credentials(args.credentials_file))
-
+  session = chronicle_auth.initialize_http_session(args.credentials_file)
   lists, next_page_token = list_lists(session, args.page_size, args.page_token)
-
   pprint.pprint(lists)
   print(f"Next page token: {next_page_token}")

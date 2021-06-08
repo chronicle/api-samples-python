@@ -37,10 +37,10 @@ DEFAULT_CREDENTIALS_FILE = pathlib.Path.home() / ".chronicle_credentials.json"
 AUTHORIZATION_SCOPES = ["https://www.googleapis.com/auth/chronicle-backstory"]
 
 
-def init_credentials(
+def initialize_http_session(
     credentials_file_path: Optional[Union[str, pathlib.Path]]
-) -> service_account.Credentials:
-  """Initializes an OAuth 2.0 credentials object based on the given file.
+) -> requests.AuthorizedSession:
+  """Initializes an authorized HTTP session, based on the given credentials.
 
   Args:
     credentials_file_path: Absolute or relative path to a JSON file containing
@@ -49,7 +49,7 @@ def init_credentials(
       user's home directory. Keep it secret, keep it safe.
 
   Returns:
-    Credentials object, used to create authorized HTTP requests.
+    HTTP session object to send authorized requests and receive responses.
 
   Raises:
     OSError: Failed to read the given file, e.g. not found, no read access
@@ -58,20 +58,8 @@ def init_credentials(
   """
   if not credentials_file_path:
     credentials_file_path = DEFAULT_CREDENTIALS_FILE
-  return service_account.Credentials.from_service_account_file(
+  credentials = service_account.Credentials.from_service_account_file(
       str(credentials_file_path), scopes=AUTHORIZATION_SCOPES)
-
-
-def init_session(
-    credentials: service_account.Credentials) -> requests.AuthorizedSession:
-  """Initializes an authorized HTTP session, based on the given credentials.
-
-  Args:
-    credentials: OAuth 2.0 credentials object.
-
-  Returns:
-    HTTP session object to send authorized requests and receive responses.
-  """
   return requests.AuthorizedSession(credentials)
 
 

@@ -22,8 +22,9 @@ import re
 from typing import Optional
 
 import dataclasses
-from common import chronicle_auth
 from google.auth.transport import requests
+
+from common import chronicle_auth
 
 CHRONICLE_API_BASE_URL = "https://backstory.googleapis.com"
 
@@ -180,7 +181,6 @@ if __name__ == "__main__":
       help="detection operation ID ('rulejob_jo_<UUID>')")
 
   args = parser.parse_args()
-  session = chronicle_auth.init_session(
-      chronicle_auth.init_credentials(args.credentials_file))
+  session = chronicle_auth.initialize_http_session(args.credentials_file)
   operation_details = get_operation(session, args.operation_id)
   print(operation_details)

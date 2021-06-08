@@ -21,9 +21,10 @@ import datetime
 import pprint
 from typing import Any, Mapping, Optional, Sequence, Tuple
 
+from google.auth.transport import requests
+
 from common import chronicle_auth
 from common import datetime_converter
-from google.auth.transport import requests
 
 CHRONICLE_API_BASE_URL = "https://backstory.googleapis.com"
 
@@ -182,8 +183,7 @@ if __name__ == "__main__":
       required=False,
       help="alert state (i.e. 'ALERTING', 'NOT_ALERTING')")
   args = parser.parse_args()
-  session = chronicle_auth.init_session(
-      chronicle_auth.init_credentials(args.credentials_file))
+  session = chronicle_auth.initialize_http_session(args.credentials_file)
   detections, next_page_token = list_detections(session, args.version_id,
                                                 args.page_size, args.page_token,
                                                 args.detection_start_time,

@@ -26,12 +26,13 @@ import pprint
 import time
 from typing import Any, Mapping, Sequence
 
+from google.auth.transport import requests
+
 from common import chronicle_auth
 from . import cancel_operation
 from . import get_operation
 from . import list_results
 from . import run_rule
-from google.auth.transport import requests
 
 DEFAULT_SLEEP_SECONDS = 5
 DEFAULT_TIMEOUT_MINUTES = 1440.0  # 1 day = 60 * 24 = 1440 minutes.
@@ -162,8 +163,7 @@ if __name__ == "__main__":
   start_time = args.local_start_time or args.utc_start_time
   end_time = args.local_end_time or args.utc_end_time
 
-  session = chronicle_auth.init_session(
-      chronicle_auth.init_credentials(args.credentials_file))
+  session = chronicle_auth.initialize_http_session(args.credentials_file)
   results = run_rule_and_wait(session, args.rule_id, start_time, end_time,
                               args.sleep_seconds, args.timeout_minutes)
   pprint.pprint(results)
