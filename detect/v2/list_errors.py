@@ -18,7 +18,7 @@
 
 import argparse
 import datetime
-import pprint
+import json
 from typing import Any, Mapping, Optional, Sequence, Tuple
 
 from google.auth.transport import requests
@@ -97,8 +97,8 @@ def list_errors(
   if response.status_code >= 400:
     print(response.text)
   response.raise_for_status()
-  json = response.json()
-  return json.get("errors", []), json.get("nextPageToken", "")
+  j = response.json()
+  return j.get("errors", []), j.get("nextPageToken", "")
 
 
 if __name__ == "__main__":
@@ -148,5 +148,5 @@ if __name__ == "__main__":
                                         args.error_start_time,
                                         args.error_end_time, args.version_id,
                                         args.page_size, args.page_token)
-  pprint.pprint(errors)
+  print(json.dumps(errors, indent=2))
   print(f"Next page token: {next_page_token}")

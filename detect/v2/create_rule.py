@@ -17,7 +17,7 @@
 """Executable and reusable sample for creating a detection rule."""
 
 import argparse
-import pprint
+import json
 from typing import Any, Mapping
 
 from google.auth.transport import requests
@@ -86,4 +86,4 @@ if __name__ == "__main__":
   args = parser.parse_args()
   session = chronicle_auth.initialize_http_session(args.credentials_file)
   new_rule = create_rule(session, args.rule_file.read())
-  pprint.pprint(new_rule)
+  print(json.dumps(new_rule, indent=2))

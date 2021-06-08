@@ -18,7 +18,7 @@
 
 import argparse
 import datetime
-import pprint
+import json
 from typing import Any, Mapping, Optional, Sequence, Tuple
 
 from google.auth.transport import requests
@@ -138,8 +138,8 @@ def list_detections(
   if response.status_code >= 400:
     print(response.text)
   response.raise_for_status()
-  json = response.json()
-  return json.get("detections", []), json.get("nextPageToken", "")
+  j = response.json()
+  return j.get("detections", []), j.get("nextPageToken", "")
 
 
 if __name__ == "__main__":
@@ -182,6 +182,7 @@ if __name__ == "__main__":
       type=str,
       required=False,
       help="alert state (i.e. 'ALERTING', 'NOT_ALERTING')")
+
   args = parser.parse_args()
   session = chronicle_auth.initialize_http_session(args.credentials_file)
   detections, next_page_token = list_detections(session, args.version_id,
@@ -189,5 +190,5 @@ if __name__ == "__main__":
                                                 args.detection_start_time,
                                                 args.detection_end_time,
                                                 args.alert_state)
-  pprint.pprint(detections)
+  print(json.dumps(detections, indent=2))
   print(f"Next page token: {next_page_token}")

@@ -17,7 +17,7 @@
 """Executable and reusable sample for listing detection rules."""
 
 import argparse
-import pprint
+import json
 from typing import Any, Mapping, Sequence, Tuple
 
 from google.auth.transport import requests
@@ -88,8 +88,8 @@ def list_rules(
   if response.status_code >= 400:
     print(response.text)
   response.raise_for_status()
-  json = response.json()
-  return json.get("rules", []), json.get("nextPageToken", "")
+  j = response.json()
+  return j.get("rules", []), j.get("nextPageToken", "")
 
 
 if __name__ == "__main__":
@@ -118,5 +118,5 @@ if __name__ == "__main__":
   session = chronicle_auth.initialize_http_session(args.credentials_file)
   rules, next_page_token = list_rules(session, args.page_size, args.page_token,
                                       args.archive_state)
-  pprint.pprint(rules)
+  print(json.dumps(rules, indent=2))
   print(f"Next page token: {next_page_token}")

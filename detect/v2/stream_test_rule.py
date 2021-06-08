@@ -239,7 +239,7 @@ def stream_test_rule(
 
         # Print an abbreviated dump of a result if it was successfully received.
         if res:
-          result_dump = json.dumps(res, indent="  ")
+          result_dump = json.dumps(res, indent=2)
           lines = 100
           result_dump_abbr = "\n".join(result_dump.split("\n")[:lines])
           print(f"First {lines} lines of the result dump:\n{result_dump_abbr}")

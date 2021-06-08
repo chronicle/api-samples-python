@@ -19,7 +19,7 @@
 import argparse
 import base64
 import binascii
-import pprint
+import json
 import re
 from typing import Any, Mapping, Optional, Sequence, Tuple
 
@@ -112,8 +112,8 @@ def list_results(
   if response.status_code >= 400:
     print(response.text)
   response.raise_for_status()
-  json = response.json()
-  return json.get("results", []), json.get("nextPageToken", "")
+  j = response.json()
+  return j.get("results", []), j.get("nextPageToken", "")
 
 
 if __name__ == "__main__":
@@ -142,5 +142,5 @@ if __name__ == "__main__":
   session = chronicle_auth.initialize_http_session(args.credentials_file)
   results, next_page_token = list_results(session, args.operation_id,
                                           args.page_size, args.page_token)
-  pprint.pprint(results)
+  print(json.dumps(results, indent=2))
   print(f"Next page token: {next_page_token}")

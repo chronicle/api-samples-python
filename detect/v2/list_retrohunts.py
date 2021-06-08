@@ -17,7 +17,7 @@
 """Executable and reusable sample for listing retrohunts."""
 
 import argparse
-import pprint
+import json
 from typing import Any, Mapping, Sequence, Tuple
 
 from google.auth.transport import requests
@@ -94,8 +94,8 @@ def list_retrohunts(
   if response.status_code >= 400:
     print(response.text)
   response.raise_for_status()
-  json = response.json()
-  return json.get("retrohunts", []), json.get("nextPageToken", "")
+  j = response.json()
+  return j.get("retrohunts", []), j.get("nextPageToken", "")
 
 
 if __name__ == "__main__":
@@ -132,5 +132,5 @@ if __name__ == "__main__":
   retrohunts, next_page_token = list_retrohunts(session, args.version_id,
                                                 args.retrohunt_state,
                                                 args.page_size, args.page_token)
-  pprint.pprint(retrohunts)
+  print(json.dumps(retrohunts, indent=2))
   print(f"Next page token: {next_page_token}")
