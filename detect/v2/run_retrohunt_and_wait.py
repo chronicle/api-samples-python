@@ -22,7 +22,7 @@ workflow.
 
 import argparse
 import datetime
-import pprint
+import json
 import time
 from typing import Any, Mapping, Sequence, Tuple
 
@@ -96,7 +96,6 @@ def run_retrohunt_and_wait(
       (response.status_code >= 400).
     TimeoutError: When retrohunt does not complete by timeout.
   """
-
   deadline = datetime.datetime.now() + datetime.timedelta(
       minutes=timeout_minutes)
   # Start RunRetrohunt by calling RunRetrohunt.
@@ -177,11 +176,11 @@ if __name__ == "__main__":
       type=int,
       required=False,
       help="maximum number of detections to return")
+
   args = parser.parse_args()
   session = chronicle_auth.initialize_http_session(args.credentials_file)
   detections, next_page_token = run_retrohunt_and_wait(
       session, args.version_id, args.start_time, args.end_time,
       args.sleep_seconds, args.timeout_minutes, args.page_size)
-
-  pprint.pprint(detections)
+  print(json.dumps(detections, indent=2))
   print(f"Next page token: {next_page_token}")

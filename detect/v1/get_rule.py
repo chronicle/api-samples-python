@@ -17,6 +17,7 @@
 """Executable and reusable sample for retrieving a detection rule."""
 
 import argparse
+import json
 import re
 
 from google.auth.transport import requests
@@ -70,4 +71,4 @@ if __name__ == "__main__":
   args = parser.parse_args()
   session = chronicle_auth.initialize_http_session(args.credentials_file)
   rule_content = get_rule(session, args.rule_id)
-  print(rule_content)
+  print(json.dumps(rule_content, indent=2))

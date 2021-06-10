@@ -17,7 +17,7 @@
 """Executable and reusable sample for retrieving detection."""
 
 import argparse
-import pprint
+import json
 from typing import Any, Mapping
 
 from google.auth.transport import requests
@@ -114,7 +114,8 @@ if __name__ == "__main__":
       type=str,
       required=True,
       help="detection ID ('de_<UUID>')")
+
   args = parser.parse_args()
   session = chronicle_auth.initialize_http_session(args.credentials_file)
   detection = get_detection(session, args.version_id, args.detection_id)
-  pprint.pprint(detection)
+  print(json.dumps(detection, indent=2))

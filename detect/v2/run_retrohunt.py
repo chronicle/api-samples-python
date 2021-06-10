@@ -18,7 +18,7 @@
 
 import argparse
 import datetime
-import pprint
+import json
 from typing import Any, Mapping
 
 from google.auth.transport import requests
@@ -100,4 +100,4 @@ if __name__ == "__main__":
   args = parser.parse_args()
   session = chronicle_auth.initialize_http_session(args.credentials_file)
   rh = run_retrohunt(session, args.version_id, args.start_time, args.end_time)
-  pprint.pprint(rh)
+  print(json.dumps(rh, indent=2))

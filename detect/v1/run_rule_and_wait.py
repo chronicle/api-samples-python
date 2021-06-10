@@ -22,7 +22,7 @@ workflow.
 
 import argparse
 import datetime
-import pprint
+import json
 import time
 from typing import Any, Mapping, Sequence
 
@@ -166,4 +166,4 @@ if __name__ == "__main__":
   session = chronicle_auth.initialize_http_session(args.credentials_file)
   results = run_rule_and_wait(session, args.rule_id, start_time, end_time,
                               args.sleep_seconds, args.timeout_minutes)
-  pprint.pprint(results)
+  print(json.dumps(results, indent=2))

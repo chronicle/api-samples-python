@@ -17,7 +17,7 @@
 """Executable and reusable sample for retrieving a retrohunt."""
 
 import argparse
-import pprint
+import json
 from typing import Any, Mapping
 
 from google.auth.transport import requests
@@ -83,7 +83,8 @@ if __name__ == "__main__":
       type=str,
       required=True,
       help="retrohunt ID ('oh_<UUID>')")
+
   args = parser.parse_args()
   session = chronicle_auth.initialize_http_session(args.credentials_file)
   retrohunt = get_retrohunt(session, args.version_id, args.retrohunt_id)
-  pprint.pprint(retrohunt)
+  print(json.dumps(retrohunt, indent=2))

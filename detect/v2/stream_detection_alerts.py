@@ -134,7 +134,7 @@ def callback_print(detection_batch: DetectionBatch):
   Args:
     detection_batch: The detection batch to print.
   """
-  detection_dump = json.dumps(detection_batch[0], indent="  ")
+  detection_dump = json.dumps(detection_batch[0], indent=2)
   lines = 100
   detection_dump_abbr = "\n".join(detection_dump.split("\n")[:lines])
   print(

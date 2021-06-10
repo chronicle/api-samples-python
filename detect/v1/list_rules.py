@@ -17,7 +17,7 @@
 """Executable and reusable sample for enumerating all the detection rules."""
 
 import argparse
-import pprint
+import json
 from typing import Mapping, Sequence
 
 from google.auth.transport import requests
@@ -84,4 +84,4 @@ if __name__ == "__main__":
   args = parser.parse_args()
   session = chronicle_auth.initialize_http_session(args.credentials_file)
   rules = list_rules(session, args.size_limit)
-  pprint.pprint(rules)
+  print(json.dumps(rules, indent=2))

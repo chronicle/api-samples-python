@@ -17,7 +17,7 @@
 """Executable and reusable sample for enumerating all detection operations."""
 
 import argparse
-import pprint
+import json
 from typing import Sequence
 
 from google.auth.transport import requests
@@ -81,11 +81,7 @@ def list_operations(http_session: requests.AuthorizedSession,
   if response.status_code >= 400:
     print(response.text)
   response.raise_for_status()
-
-  results = []
-  for json in response.json()["operations"]:
-    results.append(get_operation.Operation(json))
-  return results
+  return [get_operation.Operation(op) for op in response.json()["operations"]]
 
 
 if __name__ == "__main__":
@@ -101,4 +97,4 @@ if __name__ == "__main__":
   args = parser.parse_args()
   session = chronicle_auth.initialize_http_session(args.credentials_file)
   operations = list_operations(session, args.size_limit)
-  pprint.pprint(operations)
+  print(json.dumps(operations, indent=2))

@@ -17,7 +17,7 @@
 """Executable and reusable sample for listing lists."""
 
 import argparse
-import pprint
+import json
 from typing import Sequence
 
 from google.auth.transport import requests
@@ -74,8 +74,8 @@ def list_lists(http_session: requests.AuthorizedSession,
   if response.status_code >= 400:
     print(response.text)
   response.raise_for_status()
-  json = response.json()
-  return json.get("lists", []), json.get("nextPageToken", "")
+  j = response.json()
+  return j.get("lists", []), j.get("nextPageToken", "")
 
 
 if __name__ == "__main__":
@@ -97,5 +97,5 @@ if __name__ == "__main__":
   args = parser.parse_args()
   session = chronicle_auth.initialize_http_session(args.credentials_file)
   lists, next_page_token = list_lists(session, args.page_size, args.page_token)
-  pprint.pprint(lists)
+  print(json.dumps(lists, indent=2))
   print(f"Next page token: {next_page_token}")

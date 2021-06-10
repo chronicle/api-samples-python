@@ -17,7 +17,7 @@
 """Executable and reusable sample for retrieving an error."""
 
 import argparse
-import pprint
+import json
 from typing import Any, Mapping
 
 from google.auth.transport import requests
@@ -74,7 +74,8 @@ if __name__ == "__main__":
       type=str,
       required=True,
       help="error ID (for Detect errors: 'ed_<UUID>')")
+
   args = parser.parse_args()
   session = chronicle_auth.initialize_http_session(args.credentials_file)
   error = get_error(session, args.error_id)
-  pprint.pprint(error)
+  print(json.dumps(error, indent=2))
