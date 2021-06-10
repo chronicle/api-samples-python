@@ -13,11 +13,13 @@
 # limitations under the License.
 #
 """Unit tests for the "run_retrohunt_and_wait" module."""
+
 import datetime
 import unittest
 from unittest import mock
 
 from google.auth.transport import requests
+
 from . import run_retrohunt_and_wait as wait
 
 

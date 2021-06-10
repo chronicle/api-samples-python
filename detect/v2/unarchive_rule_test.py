@@ -12,16 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-"""Unit tests for the "archive_rule" module."""
+"""Unit tests for the "unarchive_rule" module."""
 
 import unittest
 from unittest import mock
 
 from google.auth.transport import requests
+
 from . import unarchive_rule
 
 
-class ArchiveRuleTest(unittest.TestCase):
+class UnrchiveRuleTest(unittest.TestCase):
 
   @mock.patch.object(requests, "AuthorizedSession", autospec=True)
   @mock.patch.object(requests.requests, "Response", autospec=True)

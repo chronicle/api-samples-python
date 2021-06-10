@@ -12,12 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-"""Unit tests for the "list_detections" module."""
+"""Unit tests for the "get_detection" module."""
 
 import unittest
 from unittest import mock
 
 from google.auth.transport import requests
+
 from . import get_detection
 
 

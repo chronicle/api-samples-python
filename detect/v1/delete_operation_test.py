@@ -18,6 +18,7 @@ import unittest
 from unittest import mock
 
 from google.auth.transport import requests
+
 from . import delete_operation
 
 
