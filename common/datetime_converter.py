@@ -34,6 +34,12 @@ def iso8601_datetime_utc(utc_date_time: str) -> datetime.datetime:
   Raises:
     ValueError: Invalid input value.
   """
+  # Work-around fixable issues in user-specified timestamps.
+  utc_date_time = re.sub(r"(\d{2}-\d{2}-\d{2})\s+(\d)", r"\1T\2",
+                         utc_date_time).upper()
+  if utc_date_time[-1] != "Z":
+    utc_date_time += "Z"
+
   # Append the suffix "+0000" in order to produce a timezone-aware UTC datetime,
   # because strptime's "%z" does not recognize the meaning of the "Z" suffix.
   try:
