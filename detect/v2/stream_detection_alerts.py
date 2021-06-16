@@ -175,6 +175,7 @@ def callback_slack_webhook(detection_batch: DetectionBatch):
   # version ID) from all the detections.
   detection_metadatas = []
   for detection in detections:
+    # detection["detection"] is always a list that has one element.
     meta = detection["detection"][0]
     detection_metadatas.append(
         tuple((meta["ruleName"], meta["ruleId"], meta["ruleVersion"])))
@@ -315,7 +316,7 @@ def stream_detection_alerts(
         },
         ...
       ],
-      "detection": [
+      "detection": [  <-- this is always a list that has one element.
         {
           "ruleId": "ru_<UUID>",
           "ruleName": "<rule_name>",
