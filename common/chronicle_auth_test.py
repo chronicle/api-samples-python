@@ -68,6 +68,11 @@ class ChronicleAuthTest(unittest.TestCase):
   def test_initialize_http_session_with_custom_json_credentials(self):
     chronicle_auth.initialize_http_session(self.path)
 
+  def test_initialize_http_session_with_custom_creds_and_scopes(self):
+    chronicle_auth.initialize_http_session(
+        self.path,
+        scopes=["https://www.googleapis.com/auth/malachite-ingestion"])
+
   def tearDown(self):
     os.remove(self.path)
     super().tearDown()
