@@ -27,7 +27,7 @@ https://requests.readthedocs.io
 
 import argparse
 import pathlib
-from typing import Optional, Union
+from typing import Optional, Sequence, Union
 
 from google.auth.transport import requests
 from google.oauth2 import service_account
@@ -38,8 +38,8 @@ AUTHORIZATION_SCOPES = ["https://www.googleapis.com/auth/chronicle-backstory"]
 
 
 def initialize_http_session(
-    credentials_file_path: Optional[Union[str, pathlib.Path]]
-) -> requests.AuthorizedSession:
+    credentials_file_path: Optional[Union[str, pathlib.Path]],
+    scopes: Optional[Sequence[str]] = None) -> requests.AuthorizedSession:
   """Initializes an authorized HTTP session, based on the given credentials.
 
   Args:
@@ -47,6 +47,9 @@ def initialize_http_session(
       the private OAuth 2.0 credentials of a Google Cloud Platform service
       account. Optional - the default is ".chronicle_credentials.json" in the
       user's home directory. Keep it secret, keep it safe.
+    scopes: A list of OAuth scopes (https://oauth.net/2/scope/) that are
+      associated with the end points to be accessed. The default is the
+      Chronicle API scope.
 
   Returns:
     HTTP session object to send authorized requests and receive responses.
@@ -56,10 +59,9 @@ def initialize_http_session(
       (https://docs.python.org/library/exceptions.html#os-exceptions).
     ValueError: Invalid file contents.
   """
-  if not credentials_file_path:
-    credentials_file_path = DEFAULT_CREDENTIALS_FILE
   credentials = service_account.Credentials.from_service_account_file(
-      str(credentials_file_path), scopes=AUTHORIZATION_SCOPES)
+      str(credentials_file_path or DEFAULT_CREDENTIALS_FILE),
+      scopes=scopes or AUTHORIZATION_SCOPES)
   return requests.AuthorizedSession(credentials)
 
 

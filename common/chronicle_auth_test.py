@@ -16,7 +16,10 @@
 
 import os
 import tempfile
+
 import unittest
+from unittest import mock
+from google.oauth2 import service_account
 
 from . import chronicle_auth
 
@@ -65,8 +68,27 @@ class ChronicleAuthTest(unittest.TestCase):
     os.write(fd, fake_json_credentials.strip() + fake_private_key + b'"\n}\n')
     os.close(fd)
 
-  def test_initialize_http_session_with_custom_json_credentials(self):
+  @mock.patch.object(service_account.Credentials, "from_service_account_file")
+  def test_initialize_http_session(self, mock_from_service_account_file):
+    chronicle_auth.initialize_http_session("")
+    mock_from_service_account_file.assert_called_once_with(
+        str(chronicle_auth.DEFAULT_CREDENTIALS_FILE),
+        scopes=chronicle_auth.AUTHORIZATION_SCOPES)
+
+  @mock.patch.object(service_account.Credentials, "from_service_account_file")
+  def test_initialize_http_session_with_custom_json_credentials(
+      self, mock_from_service_account_file):
     chronicle_auth.initialize_http_session(self.path)
+    mock_from_service_account_file.assert_called_once_with(
+        self.path, scopes=chronicle_auth.AUTHORIZATION_SCOPES)
+
+  @mock.patch.object(service_account.Credentials, "from_service_account_file")
+  def test_initialize_http_session_with_custom_creds_and_scopes(
+      self, mock_from_service_account_file):
+    scopes = ["https://www.googleapis.com/auth/malachite-ingestion"]
+    chronicle_auth.initialize_http_session(self.path, scopes=scopes)
+    mock_from_service_account_file.assert_called_once_with(
+        self.path, scopes=scopes)
 
   def tearDown(self):
     os.remove(self.path)
