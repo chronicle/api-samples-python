@@ -26,6 +26,7 @@ from google.auth.transport import requests
 
 from common import chronicle_auth
 from common import datetime_converter
+from common import regions
 
 CHRONICLE_API_BASE_URL = "https://backstory.googleapis.com"
 
@@ -35,6 +36,7 @@ def initialize_command_line_args(
   """Initializes and checks all the command-line arguments."""
   parser = argparse.ArgumentParser()
   chronicle_auth.add_argument_credentials_file(parser)
+  regions.add_argument_region(parser)
   parser.add_argument(
       "-ts",
       "--start_time",
@@ -164,5 +166,6 @@ if __name__ == "__main__":
   if cli.local_time:
     start, end = start.replace(tzinfo=None), end.replace(tzinfo=None)
 
+  CHRONICLE_API_BASE_URL = regions.url(CHRONICLE_API_BASE_URL, cli.region)
   session = chronicle_auth.initialize_http_session(cli.credentials_file)
   print(json.dumps(list_alerts(session, start, end), indent=2))

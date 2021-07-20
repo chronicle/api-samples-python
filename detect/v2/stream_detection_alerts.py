@@ -28,6 +28,7 @@ from google.auth.transport import requests
 
 from common import chronicle_auth
 from common import datetime_converter
+from common import regions
 
 # Set up logger that will include timestamps.
 logging.basicConfig(
@@ -485,6 +486,7 @@ def stream_detection_alerts_in_retry_loop(
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
   chronicle_auth.add_argument_credentials_file(parser)
+  regions.add_argument_region(parser)
   parser.add_argument(
       "-ct",
       "--continuation_time",
@@ -495,6 +497,7 @@ if __name__ == "__main__":
   )
 
   args = parser.parse_args()
+  CHRONICLE_API_BASE_URL = regions.url(CHRONICLE_API_BASE_URL, args.region)
   stream_detection_alerts_in_retry_loop(
       args.credentials_file,
       callback,

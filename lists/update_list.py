@@ -22,6 +22,7 @@ from typing import Optional, Sequence
 from google.auth.transport import requests
 
 from common import chronicle_auth
+from common import regions
 
 CHRONICLE_API_BASE_URL = "https://backstory.googleapis.com"
 
@@ -79,6 +80,7 @@ def update_list(http_session: requests.AuthorizedSession, name: str,
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
   chronicle_auth.add_argument_credentials_file(parser)
+  regions.add_argument_region(parser)
   parser.add_argument(
       "-n", "--name", type=str, required=True, help="unique name for the list")
   parser.add_argument(
@@ -99,6 +101,7 @@ if __name__ == "__main__":
       help="path of a file containing the list content, or - for STDIN")
 
   args = parser.parse_args()
+  CHRONICLE_API_BASE_URL = regions.url(CHRONICLE_API_BASE_URL, args.region)
   session = chronicle_auth.initialize_http_session(args.credentials_file)
   t = update_list(session, args.name, args.description,
                   args.list_file.read().splitlines())

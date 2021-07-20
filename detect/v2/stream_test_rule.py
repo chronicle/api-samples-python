@@ -26,6 +26,7 @@ from google.auth.transport import requests
 
 from common import chronicle_auth
 from common import datetime_converter
+from common import regions
 
 # Set up logger that will include timestamps.
 logging.basicConfig(
@@ -289,6 +290,7 @@ def test_rule(http_session: requests.AuthorizedSession,
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
   chronicle_auth.add_argument_credentials_file(parser)
+  regions.add_argument_region(parser)
   parser.add_argument(
       "-f",
       "--rule_file",
@@ -317,6 +319,7 @@ if __name__ == "__main__":
       help="maximum number of detections to stream back")
 
   args = parser.parse_args()
+  CHRONICLE_API_BASE_URL = regions.url(CHRONICLE_API_BASE_URL, args.region)
   session = chronicle_auth.initialize_http_session(args.credentials_file)
   test_rule(session, args.rule_file.read(), args.event_start_time,
             args.event_end_time, args.max_results)

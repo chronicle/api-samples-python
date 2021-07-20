@@ -23,6 +23,7 @@ from typing import Any, Mapping
 from google.auth.transport import requests
 
 from common import chronicle_auth
+from common import regions
 
 CHRONICLE_API_BASE_URL = "https://backstory.googleapis.com"
 
@@ -68,6 +69,7 @@ def get_error(http_session: requests.AuthorizedSession,
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
   chronicle_auth.add_argument_credentials_file(parser)
+  regions.add_argument_region(parser)
   parser.add_argument(
       "-ei",
       "--error_id",
@@ -76,6 +78,7 @@ if __name__ == "__main__":
       help="error ID (for Detect errors: 'ed_<UUID>')")
 
   args = parser.parse_args()
+  CHRONICLE_API_BASE_URL = regions.url(CHRONICLE_API_BASE_URL, args.region)
   session = chronicle_auth.initialize_http_session(args.credentials_file)
   error = get_error(session, args.error_id)
   print(json.dumps(error, indent=2))

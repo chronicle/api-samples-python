@@ -25,6 +25,7 @@ from google.auth.transport import requests
 
 from common import chronicle_auth
 from common import datetime_converter
+from common import regions
 
 CHRONICLE_API_BASE_URL = "https://backstory.googleapis.com"
 
@@ -78,6 +79,7 @@ def run_retrohunt(http_session: requests.AuthorizedSession, version_id: str,
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
   chronicle_auth.add_argument_credentials_file(parser)
+  regions.add_argument_region(parser)
   parser.add_argument(
       "-vi",
       "--version_id",
@@ -98,6 +100,7 @@ if __name__ == "__main__":
       help="Event end time in UTC ('yyyy-mm-ddThh:mm:ssZ')")
 
   args = parser.parse_args()
+  CHRONICLE_API_BASE_URL = regions.url(CHRONICLE_API_BASE_URL, args.region)
   session = chronicle_auth.initialize_http_session(args.credentials_file)
   rh = run_retrohunt(session, args.version_id, args.start_time, args.end_time)
   print(json.dumps(rh, indent=2))
