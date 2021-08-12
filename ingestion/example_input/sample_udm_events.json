@@ -1,0 +1,43 @@
+[
+  {
+    "metadata":
+      {
+        "eventTimestamp": "2021-07-14T15:30:18.142265Z",
+	"eventType": "USER_LOGIN"
+      },
+    "additional":
+      {
+        "id": "9876-54321"
+      },
+    "principal":
+      {
+        "hostname": "userhost",
+	"ip": ["10.0.0.75"],
+	"mac": ["28:80:23:0b:c9:b2"]
+      },
+    "target":
+      {
+        "hostname": "systemhost",
+	"user":
+  	  {
+	    "userid": "employee"
+  	  },
+	"ip": ["10.0.0.77"],
+	"mac": ["28:80:23:0b:c9:b3"]
+      },
+    "securityResult":
+      [
+        {
+          "action": ["ALLOW"]
+        }
+      ],
+    "extensions":
+      {
+        "auth":
+	  {
+	    "type": "MACHINE",
+	    "mechanism": ["USERNAME_PASSWORD"]
+	  }
+      }
+  }
+]
