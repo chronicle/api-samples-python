@@ -17,11 +17,11 @@
 """Executable and reusable sample for polling a detection operation."""
 
 import argparse
+import dataclasses
 import datetime
 import re
 from typing import Optional
 
-import dataclasses
 from google.auth.transport import requests
 
 from common import chronicle_auth
