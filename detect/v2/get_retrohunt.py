@@ -14,7 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-"""Executable and reusable sample for retrieving a retrohunt."""
+"""Executable and reusable sample for retrieving a retrohunt.
+
+API reference:
+https://cloud.google.com/chronicle/docs/reference/detection-engine-api#getretrohunt
+"""
 
 import argparse
 import json

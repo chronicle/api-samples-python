@@ -33,6 +33,10 @@ you can run this command using the sample imput like so:
 $ create_udm_events --customer_id=<your customer UUID> \
   --json_events_file=./example_input/sample_udm_events.json
 
+API reference:
+https://cloud.google.com/chronicle/docs/reference/ingestion-api#udmevents
+https://cloud.google.com/chronicle/docs/reference/udm-field-list
+https://cloud.google.com/chronicle/docs/unified-data-model/udm-usage
 """
 
 import argparse

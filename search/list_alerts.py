@@ -14,7 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-"""Executable and reusable sample for listing asset- and user-based alerts."""
+"""Executable and reusable sample for listing asset- and user-based alerts.
+
+API reference:
+https://cloud.google.com/chronicle/docs/reference/search-api#listalerts
+"""
 
 import argparse
 import datetime

@@ -14,7 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-"""Executable and reusable sample for listing detection rules."""
+"""Executable and reusable sample for listing detection rules.
+
+API reference:
+https://cloud.google.com/chronicle/docs/reference/detection-engine-api#listrules
+"""
 
 import argparse
 import json

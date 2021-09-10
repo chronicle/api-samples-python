@@ -14,7 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-"""Executable and reusable sample for listing detection rule errors."""
+"""Executable and reusable sample for listing detection rule errors.
+
+API reference:
+https://cloud.google.com/chronicle/docs/reference/detection-engine-api#listerrors
+"""
 
 import argparse
 import datetime

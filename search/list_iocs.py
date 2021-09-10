@@ -14,7 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-"""Executable and reusable sample for listing Indications of Compromise."""
+"""Executable and reusable sample for listing Indications of Compromise.
+
+API reference:
+https://cloud.google.com/chronicle/docs/reference/search-api#listiocs
+"""
 
 import argparse
 import datetime

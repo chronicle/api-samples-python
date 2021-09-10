@@ -14,7 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-"""Executable and reusable sample for creating a detection rule."""
+"""Executable and reusable sample for creating a detection rule.
+
+API reference:
+https://cloud.google.com/chronicle/docs/reference/detection-engine-api#createrule
+"""
 
 import argparse
 import json

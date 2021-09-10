@@ -14,7 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-"""Executable and reusable sample for retrieving detection."""
+"""Executable and reusable sample for retrieving detection.
+
+API reference:
+https://cloud.google.com/chronicle/docs/reference/detection-engine-api#getdetection
+"""
 
 import argparse
 import json

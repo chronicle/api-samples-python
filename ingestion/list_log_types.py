@@ -14,7 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-"""Executable and reusable sample for listing supported log types."""
+"""Executable and reusable sample for listing supported log types.
+
+API reference:
+https://cloud.google.com/chronicle/docs/reference/ingestion-api#logtypes
+"""
 
 import argparse
 import json

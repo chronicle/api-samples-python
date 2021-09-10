@@ -14,7 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-"""Executable and reusable sample for listing detections."""
+"""Executable and reusable sample for listing detections.
+
+API reference:
+https://cloud.google.com/chronicle/docs/reference/detection-engine-api#listdetections
+"""
 
 import argparse
 import datetime

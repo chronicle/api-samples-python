@@ -14,7 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-"""Executable and reusable sample for testing a rule without persisting results."""
+"""Executable and reusable sample for testing a rule without persisting results.
+
+API reference:
+https://cloud.google.com/chronicle/docs/reference/detection-engine-api#streamtestrule
+"""
 
 import argparse
 import datetime

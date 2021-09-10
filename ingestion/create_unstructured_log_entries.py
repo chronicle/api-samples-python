@@ -28,6 +28,8 @@ $ create_unstructured_log_entries --customer_id=<your customer UUID> \
   --log_type=BIND_DNS \
   --logs_file=./example_input/sample_unstructured_log_entries.txt
 
+API reference:
+https://cloud.google.com/chronicle/docs/reference/ingestion-api#unstructuredlogentries
 """
 
 import argparse
