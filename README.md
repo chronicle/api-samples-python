@@ -49,10 +49,6 @@ this `README.md` file):
 ### Detect API
 
 ```shell
-python3 -m detect.v1.<sample_name> -h
-```
-
-```shell
 python3 -m detect.v2.<sample_name> -h
 ```
 
