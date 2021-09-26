@@ -1,0 +1,34 @@
+[
+  {
+    "metadata":
+      {
+        "collected_timestamp": "2021-07-14T15:30:18.142265Z",
+        "entity_type": "USER",
+        "vendor_name": "ABC",
+        "product_name": "product1"
+      },
+    "entity":
+      {
+        "user": {
+          "userid": "employee",
+          "product_object_id": "doejohn"
+        }
+      }
+  },
+  {
+    "metadata":
+      {
+        "collected_timestamp": "2021-07-15T15:30:18.142265Z",
+        "entity_type": "USER",
+        "vendor_name": "ABC",
+        "product_name": "product1"
+      },
+    "entity":
+      {
+        "user": {
+          "userid": "employee1",
+          "product_object_id": "doejohn1"
+        }
+      }
+  }
+]

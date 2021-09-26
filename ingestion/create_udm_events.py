@@ -27,7 +27,7 @@ This command accepts a path to a file (--json_events_file) that contains an
 array of JSON formatted events in UDM format. See
 ./example_input/sample_udm_events.json for an example.
 
-So, assuming you're created a credentials file at ~/.chronicle_credentials.json,
+So, assuming you've created a credentials file at ~/.chronicle_credentials.json,
 you can run this command using the sample imput like so:
 
 $ create_udm_events --customer_id=<your customer UUID> \
@@ -82,10 +82,7 @@ if __name__ == "__main__":
   chronicle_auth.add_argument_credentials_file(parser)
   regions.add_argument_region(parser)
   parser.add_argument(
-      "--customer_id",
-      type=str,
-      required=True,
-      help="the customer UUID")
+      "--customer_id", type=str, required=True, help="the customer UUID")
   parser.add_argument(
       "--json_events_file",
       type=argparse.FileType("r"),
