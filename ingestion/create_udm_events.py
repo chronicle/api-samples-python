@@ -16,6 +16,10 @@
 #
 r"""Executable and reusable sample for ingesting events in UDM format.
 
+WARNING: This script makes use of the Ingestion API V2. V2 is currently only in
+preview for certain Chronicle customers. Please reach out to your Chronicle
+representative if you wish to use this API.
+
 The Unified Data Model (UDM) is a way of representing events across all log
 sources. See
 https://cloud.google.com/chronicle/docs/unified-data-model/udm-field-list for a

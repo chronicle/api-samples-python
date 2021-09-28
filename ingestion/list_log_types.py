@@ -16,6 +16,10 @@
 #
 """Executable and reusable sample for listing supported log types.
 
+WARNING: This script makes use of the Ingestion API V2. V2 is currently only in
+preview for certain Chronicle customers. Please reach out to your Chronicle
+representative if you wish to use this API.
+
 API reference:
 https://cloud.google.com/chronicle/docs/reference/ingestion-api#logtypes
 """

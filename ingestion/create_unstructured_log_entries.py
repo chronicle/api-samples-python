@@ -16,6 +16,10 @@
 #
 r"""Executable and reusable sample for ingesting unstructured log entries.
 
+WARNING: This script makes use of the Ingestion API V2. V2 is currently only in
+preview for certain Chronicle customers. Please reach out to your Chronicle
+representative if you wish to use this API.
+
 This command accepts a path to a file (--logs_file) containing raw logs, one per
 line. The format of the log depends on the log type (specified by the --log_type
 flag). See ./example_input/sample_unstructured_log_entries.txt for an example
