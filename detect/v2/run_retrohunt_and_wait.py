@@ -133,8 +133,8 @@ def run_retrohunt_and_wait(
       http_session,
       version_id=version_id,
       page_size=page_size,
-      detection_start_time=start_time,
-      detection_end_time=end_time)
+      start_time=start_time,
+      end_time=end_time)
 
 
 if __name__ == "__main__":

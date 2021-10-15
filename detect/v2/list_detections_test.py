@@ -14,6 +14,7 @@
 #
 """Unit tests for the "list_detections" module."""
 
+import datetime
 import unittest
 from unittest import mock
 
@@ -23,6 +24,56 @@ from . import list_detections
 
 
 class ListDetectionsTest(unittest.TestCase):
+
+  def test_initialize_command_line_args_verion_id(self):
+    actual = list_detections.initialize_command_line_args([
+        "--version_id=-",
+    ])
+    self.assertIsNotNone(actual)
+
+  def test_initialize_command_line_args_with_valid_parameters(self):
+    actual = list_detections.initialize_command_line_args([
+        "--version_id=-",
+        "--start_time=2021-10-04T00:00:00",
+        "--end_time=2021-10-05T00:00:00",
+        "--page_size=1000",
+        "--alert_state=ALERTING",
+        "--list_basis=CREATED_TIME",
+    ])
+    self.assertIsNotNone(actual)
+
+  def test_initialize_command_line_args_future_start_time(self):
+    start_time = datetime.datetime.utcnow().astimezone(
+        datetime.timezone.utc) + datetime.timedelta(hours=1)
+    end_time = start_time + datetime.timedelta(hours=1)
+    actual = list_detections.initialize_command_line_args([
+        "--version_id=-",
+        start_time.strftime("-st=%Y-%m-%dT%H:%M:%SZ"),
+        end_time.strftime("-et=%Y-%m-%dT%H:%M:%SZ"),
+    ])
+    self.assertIsNone(actual)
+
+  def test_initialize_command_line_args_end_time_before_start_time(self):
+    actual = list_detections.initialize_command_line_args([
+        "--version_id=-",
+        "--start_time=2021-10-05T00:00:00",
+        "--end_time=2021-10-04T00:00:00",
+    ])
+    self.assertIsNone(actual)
+
+  def test_initialize_command_line_args_invalid_alert_state(self):
+    actual = list_detections.initialize_command_line_args([
+        "--version_id=-",
+        "--alert_state=ALERT"
+    ])
+    self.assertIsNone(actual)
+
+  def test_initialize_command_line_args_invalid_list_basis(self):
+    actual = list_detections.initialize_command_line_args([
+        "--version_id=-",
+        "--list_basis=COMMIT_TIME"
+    ])
+    self.assertIsNone(actual)
 
   @mock.patch.object(requests, "AuthorizedSession", autospec=True)
   @mock.patch.object(requests.requests, "Response", autospec=True)

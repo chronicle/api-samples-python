@@ -23,6 +23,7 @@ https://cloud.google.com/chronicle/docs/reference/detection-engine-api#listdetec
 import argparse
 import datetime
 import json
+import sys
 from typing import Any, Mapping, Optional, Sequence, Tuple
 
 from google.auth.transport import requests
@@ -34,13 +35,87 @@ from common import regions
 CHRONICLE_API_BASE_URL = "https://backstory.googleapis.com"
 
 
+def initialize_command_line_args(
+    args: Optional[Sequence[str]] = None) -> Optional[argparse.Namespace]:
+  """Initializes and checks all the command-line arguments."""
+  parser = argparse.ArgumentParser()
+  chronicle_auth.add_argument_credentials_file(parser)
+  regions.add_argument_region(parser)
+  parser.add_argument(
+      "-vi",
+      "--version_id",
+      type=str,
+      required=True,
+      help=("version ID of the rule to list detections for "
+            "('- | ru_<UUID>@- | ru_<UUID>[@v_<seconds>_<nanoseconds>]')"))
+  parser.add_argument(
+      "-s",
+      "--page_size",
+      type=int,
+      required=False,
+      help="maximum number of rules to return")
+  parser.add_argument(
+      "-t",
+      "--page_token",
+      type=str,
+      required=False,
+      help="page token from a previous ListDetections call used for pagination")
+  parser.add_argument(
+      "-st",
+      "--start_time",
+      type=datetime_converter.iso8601_datetime_utc,
+      required=False,
+      help="detection start time in UTC ('yyyy-mm-ddThh:mm:ssZ')")
+  parser.add_argument(
+      "-et",
+      "--end_time",
+      type=datetime_converter.iso8601_datetime_utc,
+      required=False,
+      help="detection end time in UTC ('yyyy-mm-ddThh:mm:ssZ')")
+  parser.add_argument(
+      "-lb",
+      "--list_basis",
+      type=str,
+      required=False,
+      help="list basis (i.e. 'DETECTION_TIME', 'CREATED_TIME')")
+  parser.add_argument(
+      "-a",
+      "--alert_state",
+      type=str,
+      required=False,
+      help="alert state (i.e. 'ALERTING', 'NOT_ALERTING')")
+
+  # Sanity checks for the command-line arguments.
+  parsed_args = parser.parse_args(args)
+
+  s, e = parsed_args.start_time, parsed_args.end_time
+  if s is not None and s > datetime.datetime.utcnow().astimezone(
+      datetime.timezone.utc):
+    print("Error: start time should not be in the future")
+    return None
+  if s is not None and e is not None and s >= e:
+    print("Error: start time should not be same as or later than the end time")
+    return None
+  if parsed_args.alert_state not in (None, "ALERTING", "NOT_ALERTING"):
+    print("Error: alert_state should one of ALERTING, NOT_ALERTING, or empty")
+    return None
+  if parsed_args.list_basis not in (None, "DETECTION_TIME", "CREATED_TIME"):
+    print(
+        "Error: list_basis should one of DETECTION_TIME, CREATED_TIME, or empty"
+    )
+    return None
+
+  return parsed_args
+
+
 def list_detections(
     http_session: requests.AuthorizedSession,
     version_id: str,
     page_size: int = 0,
     page_token: str = "",
-    detection_start_time: Optional[datetime.datetime] = None,
-    detection_end_time: Optional[datetime.datetime] = None,
+    start_time: Optional[datetime.datetime] = None,
+    end_time: Optional[datetime.datetime] = None,
+    list_basis: str = "",
     alert_state: str = "") -> Tuple[Sequence[Mapping[str, Any]], str]:
   """Retrieves all the detections of the specified version_id.
 
@@ -60,13 +135,15 @@ def list_detections(
     page_token: Base64-encoded string token to retrieve a specific page of
       results. Optional - we retrieve the first page if the token is an empty
       string or a None value.
-    detection_start_time: The time to start listing detections from, inclusive
+    start_time: The time to start listing detections from, inclusive
       (default = no min detection_start_time).
-    detection_end_time: The time to end listing detections to, exclusive
+    end_time: The time to end listing detections to, exclusive
       (default = no max detection_end_time).
-    alert_state: A string that filters which detections are returned by their
-      AlertState (i.e. 'ALERTING', 'NOT_ALERTING') (default = no filter on
-      alert_state).
+    list_basis: A string that determines whether start_time and end_time refer
+      to the detection time (DETECTION_TIME) or creation time (CREATED_TIME) of
+      the detection results (default = filter by detection time).
+    alert_state: A string that filters which detections are returned, based on
+      their AlertState: "ALERTING" or "NOT_ALERTING" (default = no filtering).
 
   Returns:
     All the detections (within the defined page) ordered by descending
@@ -82,11 +159,12 @@ def list_detections(
   params_list = [
       ("page_size", page_size),
       ("page_token", page_token),
-      ("detection_start_time",
-       datetime_converter.strftime(detection_start_time)),
-      ("detection_end_time", datetime_converter.strftime(detection_end_time)),
+      ("start_time", datetime_converter.strftime(start_time)),
+      ("end_time", datetime_converter.strftime(end_time)),
+      ("list_basis", list_basis),
       ("alert_state", alert_state),
   ]
+
   params = {k: v for k, v in params_list if v}
 
   response = http_session.request("GET", url, params=params)
@@ -148,54 +226,15 @@ def list_detections(
 
 
 if __name__ == "__main__":
-  parser = argparse.ArgumentParser()
-  chronicle_auth.add_argument_credentials_file(parser)
-  regions.add_argument_region(parser)
-  parser.add_argument(
-      "-vi",
-      "--version_id",
-      type=str,
-      required=True,
-      help=("version ID of the rule to list detections for "
-            "('- | ru_<UUID>@- | ru_<UUID>[@v_<seconds>_<nanoseconds>]')"))
-  parser.add_argument(
-      "-s",
-      "--page_size",
-      type=int,
-      required=False,
-      help="maximum number of rules to return")
-  parser.add_argument(
-      "-t",
-      "--page_token",
-      type=str,
-      required=False,
-      help="page token from a previous ListDetections call used for pagination")
-  parser.add_argument(
-      "-dst",
-      "--detection_start_time",
-      type=datetime_converter.iso8601_datetime_utc,
-      required=False,
-      help="detection start time in UTC ('yyyy-mm-ddThh:mm:ssZ')")
-  parser.add_argument(
-      "-det",
-      "--detection_end_time",
-      type=datetime_converter.iso8601_datetime_utc,
-      required=False,
-      help="detection end time in UTC ('yyyy-mm-ddThh:mm:ssZ')")
-  parser.add_argument(
-      "-a",
-      "--alert_state",
-      type=str,
-      required=False,
-      help="alert state (i.e. 'ALERTING', 'NOT_ALERTING')")
+  cli = initialize_command_line_args()
+  if not cli:
+    sys.exit(1)  # A sanity check failed.
 
-  args = parser.parse_args()
-  CHRONICLE_API_BASE_URL = regions.url(CHRONICLE_API_BASE_URL, args.region)
-  session = chronicle_auth.initialize_http_session(args.credentials_file)
-  detections, next_page_token = list_detections(session, args.version_id,
-                                                args.page_size, args.page_token,
-                                                args.detection_start_time,
-                                                args.detection_end_time,
-                                                args.alert_state)
+  CHRONICLE_API_BASE_URL = regions.url(CHRONICLE_API_BASE_URL, cli.region)
+  session = chronicle_auth.initialize_http_session(cli.credentials_file)
+  detections, next_page_token = list_detections(session, cli.version_id,
+                                                cli.page_size, cli.page_token,
+                                                cli.start_time, cli.end_time,
+                                                cli.list_basis, cli.alert_state)
   print(json.dumps(detections, indent=2))
   print(f"Next page token: {next_page_token}")
