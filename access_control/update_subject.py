@@ -83,7 +83,7 @@ def update_subject(http_session: requests.AuthorizedSession, name: str,
     roles: The role(s) the subject must have after the update.
 
   Returns:
-    Information about the requested subject in the form:
+    Information about the newly updated subject in the form:
     {
       "subject": {
         "name": "test@test.com",
