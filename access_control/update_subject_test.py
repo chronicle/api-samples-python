@@ -28,20 +28,11 @@ class UpdateSubjectTest(unittest.TestCase):
 
   def test_initialize_command_line_args(self):
     actual = update_subject.initialize_command_line_args(
-        ["--name=test@test.com", "--type=ANALYST", "--roles="])
+        ["--name=test@test.com", "--roles="])
     self.assertEqual(
         actual,
         argparse.Namespace(
-            credentials_file=None,
-            name="test@test.com",
-            type="ANALYST",
-            roles="",
-            region="us"))
-
-  def test_initialize_command_line_args_invalid_type(self):
-    actual = update_subject.initialize_command_line_args(
-        ["--name=test@test.com", "--type=INVALID", "--roles="])
-    self.assertIsNone(actual)
+            credentials_file=None, name="test@test.com", roles="", region="us"))
 
   @mock.patch.object(requests, "AuthorizedSession", autospec=True)
   @mock.patch.object(requests.requests, "Response", autospec=True)
@@ -52,7 +43,7 @@ class UpdateSubjectTest(unittest.TestCase):
         requests.requests.exceptions.HTTPError())
 
     with self.assertRaises(requests.requests.exceptions.HTTPError):
-      update_subject.update_subject(mock_session, "", "", [])
+      update_subject.update_subject(mock_session, "", [])
 
   @mock.patch.object(requests, "AuthorizedSession", autospec=True)
   @mock.patch.object(requests.requests, "Response", autospec=True)
@@ -60,7 +51,6 @@ class UpdateSubjectTest(unittest.TestCase):
     mock_session.request.return_value = mock_response
     type(mock_response).status_code = mock.PropertyMock(return_value=200)
     subject_id = "test@test.com"
-    subject_type = "ANALYST"
     roles = ["Test"]
     expected = {
         "subject": {
@@ -89,8 +79,7 @@ class UpdateSubjectTest(unittest.TestCase):
         },
     }
     mock_response.json.return_value = expected
-    actual = update_subject.update_subject(mock_session, subject_id,
-                                           subject_type, roles)
+    actual = update_subject.update_subject(mock_session, subject_id, roles)
     self.assertEqual(actual, expected)
 
 

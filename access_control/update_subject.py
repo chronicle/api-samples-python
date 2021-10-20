@@ -43,43 +43,27 @@ def initialize_command_line_args(
   parser.add_argument(
       "-n", "--name", type=str, required=True, help="subject ID")
   parser.add_argument(
-      "-t",
-      "--type",
-      type=str,
-      required=True,
-      help=("the subject's type (ANALYST or IDP_GROUP)"))
-  parser.add_argument(
       "-rs",
       "--roles",
       type=str,
       required=True,
       help=("the role(s) the subject must have after the update"))
 
-  # Sanity checks for the command-line arguments.
-
   # No need for a sanity check for the subject name and roles because these
   # arguments convert the provided input into strings and accept a wide range
   # of values. If the subject name isn't passed in, the error will be thrown
   # from the argparse library.
 
-  # Check the subject type.
-  parsed_args = parser.parse_args(args)
-  if parsed_args.type not in ("ANALYST", "IDP_GROUP"):
-    print("Error: invalid subject type")
-    return None
-
   return parser.parse_args(args)
 
 
 def update_subject(http_session: requests.AuthorizedSession, name: str,
-                   subject_type: str,
                    roles: Sequence[str]) -> Mapping[str, Sequence[Any]]:
   """Updates information about a subject.
 
   Args:
     http_session: Authorized session for HTTP requests.
     name: The ID of the subject to retrieve information about.
-    subject_type: The subject's type (ANALYST or IDP_GROUP).
     roles: The role(s) the subject must have after the update.
 
   Returns:
@@ -117,7 +101,6 @@ def update_subject(http_session: requests.AuthorizedSession, name: str,
   url = f"{CHRONICLE_API_BASE_URL}/v1/subjects/{name}"
   body = {
       "name": name,
-      "type": subject_type,
       "roles": roles,
   }
   update_fields = ["subject.roles"]
@@ -139,5 +122,4 @@ if __name__ == "__main__":
   session = chronicle_auth.initialize_http_session(cli.credentials_file)
   print(
       json.dumps(
-          update_subject(session, cli.name, cli.type, cli.roles.split(",")),
-          indent=2))
+          update_subject(session, cli.name, cli.roles.split(",")), indent=2))
