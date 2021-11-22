@@ -43,6 +43,8 @@ def initialize_command_line_args(
   parser.add_argument(
       "-n", "--name", type=str, required=True, help="subject ID")
   parser.add_argument(
+      "-t", "--type", type=str, required=True, help="subject type")
+  parser.add_argument(
       "-rs",
       "--roles",
       type=str,
@@ -54,16 +56,25 @@ def initialize_command_line_args(
   # of values. If the subject name isn't passed in, the error will be thrown
   # from the argparse library.
 
+  # Sanity check for the subject type.
+  parsed_args = parser.parse_args(args)
+  if parsed_args.type not in ("SUBJECT_TYPE_ANALYST", "SUBJECT_TYPE_IDP_GROUP"):
+    print("Error: subject type must be SUBJECT_TYPE_<ANALYST|IDP_GROUP>")
+    return None
+
   return parser.parse_args(args)
 
 
 def create_subject(http_session: requests.AuthorizedSession, name: str,
+                   subject_type: str,
                    roles: Sequence[str]) -> Mapping[str, Sequence[Any]]:
   """Creates a subject.
 
   Args:
     http_session: Authorized session for HTTP requests.
-    name: The ID of the subject to retrieve information about.
+    name: The ID of the subject to be created.
+    subject_type: The type of the subject, e.g., SUBJECT_TYPE_ANALYST or
+      SUBJECT_TYPE_IDP_GROUP.
     roles: The role(s) the created subject must have.
 
   Returns:
@@ -98,10 +109,12 @@ def create_subject(http_session: requests.AuthorizedSession, name: str,
     requests.exceptions.HTTPError: HTTP request resulted in an error
       (response.status_code >= 400).
   """
-  url = f"{CHRONICLE_API_BASE_URL}/v1/subjects/{name}"
+  url = f"{CHRONICLE_API_BASE_URL}/v1/subjects/"
+
   body = {
       "name": name,
-      "roles": roles,
+      "type": subject_type,
+      "roles": [{"name": role} for role in roles],
   }
   response = http_session.request("POST", url, json=body)
 
@@ -120,4 +133,5 @@ if __name__ == "__main__":
   session = chronicle_auth.initialize_http_session(cli.credentials_file)
   print(
       json.dumps(
-          create_subject(session, cli.name, cli.roles.split(",")), indent=2))
+          create_subject(session, cli.name, cli.type, cli.roles.split(",")),
+          indent=2))

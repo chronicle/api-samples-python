@@ -28,11 +28,20 @@ class CreateSubjectTest(unittest.TestCase):
 
   def test_initialize_command_line_args(self):
     actual = create_subject.initialize_command_line_args(
-        ["--name=test@test.com", "--roles="])
+        ["--name=test@test.com", "--type=SUBJECT_TYPE_ANALYST", "--roles="])
     self.assertEqual(
         actual,
         argparse.Namespace(
-            credentials_file=None, name="test@test.com", roles="", region="us"))
+            credentials_file=None,
+            name="test@test.com",
+            type="SUBJECT_TYPE_ANALYST",
+            roles="",
+            region="us"))
+
+  def test_initialize_command_line_args_subject_type(self):
+    actual = create_subject.initialize_command_line_args(
+        ["--name=test@test.com", "--type=SUBJECT_TYPE_INVALID", "--roles="])
+    self.assertIsNone(actual)
 
   @mock.patch.object(requests, "AuthorizedSession", autospec=True)
   @mock.patch.object(requests.requests, "Response", autospec=True)
@@ -43,7 +52,7 @@ class CreateSubjectTest(unittest.TestCase):
         requests.requests.exceptions.HTTPError())
 
     with self.assertRaises(requests.requests.exceptions.HTTPError):
-      create_subject.create_subject(mock_session, "", [])
+      create_subject.create_subject(mock_session, "", "", [])
 
   @mock.patch.object(requests, "AuthorizedSession", autospec=True)
   @mock.patch.object(requests.requests, "Response", autospec=True)
@@ -51,13 +60,14 @@ class CreateSubjectTest(unittest.TestCase):
     mock_session.request.return_value = mock_response
     type(mock_response).status_code = mock.PropertyMock(return_value=200)
     subject_id = "test@test.com"
+    subject_type = "SUBJECT_TYPE_ANALYST"
     roles = ["Test"]
     expected = {
         "subject": {
             "name":
                 subject_id,
             "type":
-                "SUBJECT_TYPE_ANALYST",
+                subject_type,
             "roles": [{
                 "name":
                     "Test",
@@ -79,7 +89,8 @@ class CreateSubjectTest(unittest.TestCase):
         },
     }
     mock_response.json.return_value = expected
-    actual = create_subject.create_subject(mock_session, subject_id, roles)
+    actual = create_subject.create_subject(mock_session, subject_id,
+                                           subject_type, roles)
     self.assertEqual(actual, expected)
 
 
