@@ -99,16 +99,9 @@ def update_subject(http_session: requests.AuthorizedSession, name: str,
       (response.status_code >= 400).
   """
   url = f"{CHRONICLE_API_BASE_URL}/v1/subjects/{name}"
-
-  roles_json = []
-  for role in roles:
-    roles_json += {
-        "name": role,
-    },
-
   body = {
       "name": name,
-      "roles": roles_json,
+      "roles": [{"name": role} for role in roles],
   }
   update_fields = ["subject.roles"]
   params = {"update_mask": ",".join(update_fields)}
