@@ -17,6 +17,9 @@
 """Executable and reusable sample for retrieving information about a subject.
 
 A subject can be an analyst or an Identity Provider (IdP) group.
+
+API reference:
+https://cloud.google.com/chronicle/docs/reference/rbac-api#getsubject
 """
 
 import argparse

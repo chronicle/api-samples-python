@@ -14,7 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-"""Executable and reusable sample for retrieving a list of access roles."""
+"""Executable and reusable sample for retrieving a list of access roles.
+
+API reference:
+https://cloud.google.com/chronicle/docs/reference/rbac-api#listroles
+"""
 
 import argparse
 import json

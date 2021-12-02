@@ -14,7 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-"""Executable and reusable sample for updating an access-control role."""
+"""Executable and reusable sample for updating an access-control role.
+
+API reference:
+https://cloud.google.com/chronicle/docs/reference/rbac-api#updaterole
+"""
 
 import argparse
 import json
