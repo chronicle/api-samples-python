@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2021 Google LLC
+# Copyright 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,10 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-"""Executable sample for creating a Cortex XDR feed.
-
-For more documentation on this specific type of feed, see:
-https://docs.paloaltonetworks.com/content/dam/techdocs/en_US/pdf/cortex/cortex-xdr/cortex-xdr-api/cortex-xdr-api.pdf
+"""Executable sample for creating a Okta User Context feed.
 
 Creating other feeds requires changing this sample code.
 """
@@ -34,19 +31,18 @@ from common import regions
 CHRONICLE_API_BASE_URL = "https://backstory.googleapis.com"
 
 
-def create_cortex_xdr_feed(http_session: requests.AuthorizedSession,
-                           name: str,
-                           hostname: str) -> Mapping[str, Any]:
-  """Creates a new Cortex XDR feed.
+def create_okta_user_context_feed(http_session: requests.AuthorizedSession,
+                                  secret: str,
+                                  hostname: str) -> Mapping[str, Any]:
+  """Creates a new Okta User Context feed.
 
   Args:
     http_session: Authorized session for HTTP requests.
-    name: Unique name for the feed.
-    hostname: A string in the form "api-{fqdn}", provided to the customer by
-      Cortex XDR, e.g. "api-host.xdr.domain.paloaltonetworks.com".
+    secret: A string which represents Okta auth user's secret.
+    hostname: A string which represents hostname to connect to.
 
   Returns:
-    New Cortex XDR Feed.
+    New Okta Feed.
 
   Raises:
     requests.exceptions.HTTPError: HTTP request resulted in an error
@@ -54,26 +50,41 @@ def create_cortex_xdr_feed(http_session: requests.AuthorizedSession,
   """
   url = f"{CHRONICLE_API_BASE_URL}/v1/feeds/"
   body = {
-      "name": name,
-      "feedDetails": {
-          "feedType": "CORTEX_XDR",
-          "cortexXdrSettings": {
-              "hostname": hostname,
-          },
-      },
-      "feedState": "PENDING_ENABLEMENT",
-    }
+      "details": {
+          "feedSourceType": "API",
+          "logType": "OKTA_USER_CONTEXT",
+          "oktaUserContextSettings": {
+              "authentication": {
+                  "headerKeyValues": [{
+                      "key": "Authorization",
+                      "value": secret
+                  }]
+              },
+              "hostname": hostname
+          }
+      }
+  }
 
   response = http_session.request("POST", url, json=body)
   # Expected server response:
   # {
-  #   "feedDetails": {
-  #     "cortexXdrSettings": {
-  #       "hostname": "<hostname>",
-  #     },
-  #     "feedType": "CORTEX_XDR",
+  #   "name": "feeds/7c420442-6b73-439e-ae8b-563618b8fc71",
+  #   "details": {
+  #     "logType": "OKTA_USER_CONTEXT",
+  #     "feedSourceType": "API",
+  #     "oktaUserContextSettings": {
+  #       "authentication": {
+  #         "headerKeyValues": [
+  #           {
+  #             "key": "Authorization",
+  #             "value": "secret_example"
+  #           }
+  #         ]
+  #       },
+  #       "hostname": "hostname_example"
+  #     }
   #   },
-  #   "name": "<name>",
+  #   "feedState": "PENDING_ENABLEMENT"
   # }
 
   if response.status_code >= 400:
@@ -87,20 +98,20 @@ if __name__ == "__main__":
   chronicle_auth.add_argument_credentials_file(parser)
   regions.add_argument_region(parser)
   parser.add_argument(
-      "-n",
-      "--name",
+      "-s",
+      "--secret",
       type=str,
       required=True,
-      help="unique name for the feed")
+      help="secret")
   parser.add_argument(
-      "-ho",
+      "-hn",
       "--hostname",
       type=str,
       required=True,
-      help="unique hostname")
+      help="hostname")
 
   args = parser.parse_args()
   CHRONICLE_API_BASE_URL = regions.url(CHRONICLE_API_BASE_URL, args.region)
   session = chronicle_auth.initialize_http_session(args.credentials_file)
-  new_feed = create_cortex_xdr_feed(session, args.name, args.hostname)
+  new_feed = create_okta_user_context_feed(session, args.secret, args.hostname)
   print(json.dumps(new_feed, indent=2))

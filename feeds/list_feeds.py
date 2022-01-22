@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-"""Executable and reusable sample for retrieving a feed."""
+"""Executable and reusable sample for retrieving a list of feeds."""
 
 import argparse
 import json
@@ -28,13 +28,11 @@ from common import regions
 CHRONICLE_API_BASE_URL = "https://backstory.googleapis.com"
 
 
-def get_feed(http_session: requests.AuthorizedSession,
-             name: str) -> Mapping[str, Any]:
-  """Retrieves a feed.
+def list_feeds(http_session: requests.AuthorizedSession) -> Mapping[str, Any]:
+  """Retrieves all feeds for the tenant.
 
   Args:
     http_session: Authorized session for HTTP requests.
-    name: Unique name for the feed.
 
   Returns:
     Array containing each line of the feed's content.
@@ -43,17 +41,33 @@ def get_feed(http_session: requests.AuthorizedSession,
     requests.exceptions.HTTPError: HTTP request resulted in an error
       (response.status_code >= 400).
   """
-  url = f"{CHRONICLE_API_BASE_URL}/v1/feeds/{name}"
+  url = f"{CHRONICLE_API_BASE_URL}/v1/feeds"
 
   response = http_session.request("GET", url)
   # Expected server response:
   # {
-  #   "name": "<feed name>",
-  #   "feedDetails": {
-  #     feedType: "...",
-  #     ...settings...
+  # "feeds": [
+  #   {
+  #     "name": "feeds/19e82867-ab6d-4955-b9c8-bd4aee189439",
+  #     "details": {
+  #       "logType": "AZURE_AD_CONTEXT",
+  #       "feedSourceType": "API",
+  #       "azureAdContextSettings": {}
+  #     },
+  #     "feedState": "INACTIVE"
   #   },
-  #   "feedState": "ACTIVE / INACTIVE / PENDING_ENABLEMENT",
+  #   {
+  #     "name": "feeds/cdc096a5-93a8-4854-94d9-c05cf0c14d47",
+  #     "details": {
+  #       "logType": "PAN_PRISMA_CLOUD",
+  #       "feedSourceType": "API",
+  #       "panPrismaCloudSettings": {
+  #         "hostname": "api2.prismacloud.io"
+  #       }
+  #     },
+  #     "feedState": "ACTIVE"
+  #   }
+  # ]
   # }
 
   if response.status_code >= 400:
@@ -66,14 +80,8 @@ if __name__ == "__main__":
   parser = argparse.ArgumentParser()
   chronicle_auth.add_argument_credentials_file(parser)
   regions.add_argument_region(parser)
-  parser.add_argument(
-      "-n",
-      "--name",
-      type=str,
-      required=True,
-      help="unique name for the feed")
 
   args = parser.parse_args()
   CHRONICLE_API_BASE_URL = regions.url(CHRONICLE_API_BASE_URL, args.region)
   session = chronicle_auth.initialize_http_session(args.credentials_file)
-  print(json.dumps(get_feed(session, args.name), indent=2))
+  print(json.dumps(list_feeds(session), indent=2))

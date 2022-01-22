@@ -1,4 +1,4 @@
-# Copyright 2021 Google LLC
+# Copyright 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,14 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-"""Unit tests for the "create_feed" module."""
+"""Unit tests for the "create_okta_user_context_feed" module."""
 
 import unittest
 from unittest import mock
 
 from google.auth.transport import requests
 
-from . import create_feed
+from . import create_okta_user_context_feed
 
 
 class CreateFeedTest(unittest.TestCase):
@@ -33,9 +33,8 @@ class CreateFeedTest(unittest.TestCase):
         requests.requests.exceptions.HTTPError())
 
     with self.assertRaises(requests.requests.exceptions.HTTPError):
-      create_cortex_xdr_feed.create_cortex_xdr_feed(mock_session,
-                                                    "new feed name",
-                                                    "new feed hostname")
+      create_okta_user_context_feed.create_okta_user_context_feed(
+          mock_session, "secret_example", "hostname.example.com")
 
   @mock.patch.object(requests, "AuthorizedSession", autospec=True)
   @mock.patch.object(requests.requests, "Response", autospec=True)
@@ -43,18 +42,26 @@ class CreateFeedTest(unittest.TestCase):
     mock_session.request.return_value = mock_response
     type(mock_response).status_code = mock.PropertyMock(return_value=200)
     expected_feed = {
-        "feedDetails": {
-            "cortexXdrSettings": {
-                "hostname": "api-XXXX.xdr.XX.paloaltonetworks.com",
+        "name": "feeds/cf49ebc5-e7bf-4562-8061-cab43cecba35",
+        "details": {
+            "logType": "OKTA_USER_CONTEXT",
+            "feedSourceType": "API",
+            "oktaSettings": {
+                "authentication": {
+                    "headerKeyValues": [{
+                        "key": "key_example",
+                        "value": "value_example"
+                    }]
+                }
             },
-            "feedType": "CORTEX_XDR",
         },
-        "name": "feed name",
+        "feedState": "PENDING_ENABLEMENT"
     }
+
     mock_response.json.return_value = expected_feed
 
-    actual_feed = create_cortex_xdr_feed.create_cortex_xdr_feed(
-        mock_session, "feed name", "api-XXXX.xdr.XX.paloaltonetworks.com")
+    actual_feed = create_okta_user_context_feed.create_okta_user_context_feed(
+        mock_session, "secret_example", "hostname.example.com")
     self.assertEqual(actual_feed, expected_feed)
 
 

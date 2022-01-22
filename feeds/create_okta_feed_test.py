@@ -12,17 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-"""Unit tests for the "delete_feed" module."""
+"""Unit tests for the "create_okta_feed" module."""
 
 import unittest
 from unittest import mock
 
 from google.auth.transport import requests
 
-from . import delete_feed
+from . import create_okta_feed
 
 
-class DeleteFeedTest(unittest.TestCase):
+class CreateFeedTest(unittest.TestCase):
 
   @mock.patch.object(requests, "AuthorizedSession", autospec=True)
   @mock.patch.object(requests.requests, "Response", autospec=True)
@@ -33,15 +33,36 @@ class DeleteFeedTest(unittest.TestCase):
         requests.requests.exceptions.HTTPError())
 
     with self.assertRaises(requests.requests.exceptions.HTTPError):
-      delete_feed.delete_feed(mock_session, "feed name")
+      create_okta_feed.create_okta_feed(mock_session, "secret_example",
+                                        "hostname.example.com")
 
   @mock.patch.object(requests, "AuthorizedSession", autospec=True)
   @mock.patch.object(requests.requests, "Response", autospec=True)
   def test_happy_path(self, mock_response, mock_session):
     mock_session.request.return_value = mock_response
     type(mock_response).status_code = mock.PropertyMock(return_value=200)
+    expected_feed = {
+        "name": "feeds/cf49ebc5-e7bf-4562-8061-cab43cecba35",
+        "details": {
+            "logType": "OKTA",
+            "feedSourceType": "API",
+            "oktaSettings": {
+                "authentication": {
+                    "headerKeyValues": [{
+                        "key": "key_example",
+                        "value": "value_example"
+                    }]
+                }
+            },
+        },
+        "feedState": "PENDING_ENABLEMENT"
+    }
 
-    delete_feed.delete_feed(mock_session, "feed name")
+    mock_response.json.return_value = expected_feed
+
+    actual_feed = create_okta_feed.create_okta_feed(
+        mock_session, "secret_example", "hostname.example.com")
+    self.assertEqual(actual_feed, expected_feed)
 
 
 if __name__ == "__main__":
