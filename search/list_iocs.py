@@ -52,14 +52,24 @@ def initialize_command_line_args(
       "--local_time",
       action="store_true",
       help=("time is specified in the system's local timezone (default = UTC)"))
+  parser.add_argument(
+      "-s",
+      "--page_size",
+      type=int,
+      default=10000,
+      help=("Maximum number of IoCs to return, up to 10,000" +
+            "(default = 10,000)"))
 
   # Sanity checks for the command-line arguments.
   parsed_args = parser.parse_args(args)
-  s = parsed_args.start_time
+  s, ps = parsed_args.start_time, parsed_args.page_size
   if parsed_args.local_time:
     s = s.replace(tzinfo=None).astimezone(datetime.timezone.utc)
   if s > datetime.datetime.now().astimezone(datetime.timezone.utc):
     print("Error: start time should not be in the future")
+    return None
+  if ps > 10000 or ps < 1:
+    print("Error: page size can not be more than 10,000 or less than 1")
     return None
 
   return parsed_args
@@ -135,10 +145,10 @@ if __name__ == "__main__":
   if not cli:
     sys.exit(1)  # A sanity check failed.
 
-  start = cli.start_time
+  start, size = cli.start_time, cli.page_size
   if cli.local_time:
     start = start.replace(tzinfo=None)
 
   CHRONICLE_API_BASE_URL = regions.url(CHRONICLE_API_BASE_URL, cli.region)
   session = chronicle_auth.initialize_http_session(cli.credentials_file)
-  print(json.dumps(list_iocs(session, start), indent=2))
+  print(json.dumps(list_iocs(session, start, size), indent=2))

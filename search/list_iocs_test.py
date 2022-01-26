@@ -35,6 +35,21 @@ class ListIocsTest(unittest.TestCase):
         ["-ts=2021-05-07T11:22:33Z"])
     self.assertIsNotNone(actual)
 
+  def test_initialize_command_line_args_page_size(self):
+    actual = list_iocs.initialize_command_line_args(
+        ["-ts=2021-05-07T11:22:33Z", "--page_size=1000"])
+    self.assertIsNotNone(actual)
+
+  def test_initialize_command_line_args_zero_page_size(self):
+    actual = list_iocs.initialize_command_line_args(
+        ["-ts=2021-05-07T11:22:33Z", "--page_size=0"])
+    self.assertIsNone(actual)
+
+  def test_initialize_command_line_args_large_page_size(self):
+    actual = list_iocs.initialize_command_line_args(
+        ["-ts=2021-05-07T11:22:33Z", "--page_size=10001"])
+    self.assertIsNone(actual)
+
   def test_initialize_command_line_args_future(self):
     start_time = datetime.datetime.utcnow().astimezone(datetime.timezone.utc)
     start_time += datetime.timedelta(days=2)

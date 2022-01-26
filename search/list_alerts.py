@@ -58,10 +58,17 @@ def initialize_command_line_args(
       action="store_true",
       help=("times are specified in the system's local timezone " +
             "(default = UTC)"))
+  parser.add_argument(
+      "-s",
+      "--page_size",
+      type=int,
+      default=100000,
+      help=("Maximum number of alerts to return, up to 100,000" +
+            "(default = 100,000)"))
 
   # Sanity checks for the command-line arguments.
   parsed_args = parser.parse_args(args)
-  s, e = parsed_args.start_time, parsed_args.end_time
+  s, e, ps = parsed_args.start_time, parsed_args.end_time, parsed_args.page_size
   if parsed_args.local_time:
     s = s.replace(tzinfo=None).astimezone(datetime.timezone.utc)
     e = e.replace(tzinfo=None).astimezone(datetime.timezone.utc)
@@ -73,6 +80,9 @@ def initialize_command_line_args(
     return None
   if s >= e:
     print("Error: start time should not be same as or later than end time")
+    return None
+  if ps > 100000 or ps < 1:
+    print("Error: page size can not be more than 100,000 or less than 1")
     return None
 
   return parsed_args
@@ -166,10 +176,10 @@ if __name__ == "__main__":
   if not cli:
     sys.exit(1)  # A sanity check failed.
 
-  start, end = cli.start_time, cli.end_time
+  start, end, size = cli.start_time, cli.end_time, cli.page_size
   if cli.local_time:
     start, end = start.replace(tzinfo=None), end.replace(tzinfo=None)
 
   CHRONICLE_API_BASE_URL = regions.url(CHRONICLE_API_BASE_URL, cli.region)
   session = chronicle_auth.initialize_http_session(cli.credentials_file)
-  print(json.dumps(list_alerts(session, start, end), indent=2))
+  print(json.dumps(list_alerts(session, start, end, size), indent=2))

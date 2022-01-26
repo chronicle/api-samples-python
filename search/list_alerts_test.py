@@ -76,6 +76,27 @@ class ListAlertsTest(unittest.TestCase):
     ])
     self.assertIsNone(actual)
 
+  def test_initialize_command_line_args_page_size(self):
+    actual = list_alerts.initialize_command_line_args([
+        "--start_time=2021-05-07T11:22:33", "--end_time=2021-05-08T11:22:33",
+        "--local_time", "--page_size=10000"
+    ])
+    self.assertIsNotNone(actual)
+
+  def test_initialize_command_line_args_large_page_size(self):
+    actual = list_alerts.initialize_command_line_args([
+        "--start_time=2021-05-07T11:22:33", "--end_time=2021-05-08T11:22:33",
+        "--local_time", "--page_size=200000"
+    ])
+    self.assertIsNone(actual)
+
+  def test_initialize_command_line_args_zero_page_size(self):
+    actual = list_alerts.initialize_command_line_args([
+        "--start_time=2021-05-07T11:22:33", "--end_time=2021-05-08T11:22:33",
+        "--local_time", "--page_size=0"
+    ])
+    self.assertIsNone(actual)
+
   @mock.patch.object(requests, "AuthorizedSession", autospec=True)
   @mock.patch.object(requests.requests, "Response", autospec=True)
   def test_list_alerts(self, mock_response, mock_session):
