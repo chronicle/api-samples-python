@@ -32,14 +32,14 @@ CHRONICLE_API_BASE_URL = "https://backstory.googleapis.com"
 
 
 def create_azure_ad_context_feed(http_session: requests.AuthorizedSession,
-                                 tokenendpoint: str, clientid: str,
+                                 tenantid: str, clientid: str,
                                  clientsecret: str, retrievedevices: bool,
                                  retrievegroups: bool) -> Mapping[str, Any]:
   """Creates a new Azure AD Context feed.
 
   Args:
     http_session: Authorized session for HTTP requests.
-    tokenendpoint: A string which represents endpoint to connect to.
+    tenantid: A string which represents the tenant id.
     clientid: A string which represents Id of the credential to use.
     clientsecret: A string which represents secret of the credential to use.
     retrievedevices: A boolean to indicate whether to retrieve devices or not.
@@ -59,12 +59,12 @@ def create_azure_ad_context_feed(http_session: requests.AuthorizedSession,
           "logType": "AZURE_AD_CONTEXT",
           "azureAdContextSettings": {
               "authentication": {
-                  "tokenEndpoint": tokenendpoint,
                   "clientId": clientid,
                   "clientSecret": clientsecret
               },
               "retrieveDevices": retrievedevices,
-              "retrieveGroups": retrievegroups
+              "retrieveGroups": retrievegroups,
+              "tenantId": tenantid,
           }
       }
   }
@@ -78,14 +78,14 @@ def create_azure_ad_context_feed(http_session: requests.AuthorizedSession,
   #     "feedSourceType": "API",
   #     "azureAdContextSettings": {
   #       "authentication": {
-  #         "tokenEndpoint": "tokenendpoint.example.com",
   #         "clientId": "clientid_example",
   #         "clientSecret": "clientsecret_example"
   #       },
-  #       "retrieveDevices": true
+  #       "retrieveDevices": true,
+  #       "tenantId": "0fc279f9-fe30-41be-97d3-abe1d7681418"
   #     }
   #   },
-  #   "feedState": "PENDING_ENABLEMENT"
+  #   "feedState": "ACTIVE"
   # }
 
   if response.status_code >= 400:
@@ -99,23 +99,11 @@ if __name__ == "__main__":
   chronicle_auth.add_argument_credentials_file(parser)
   regions.add_argument_region(parser)
   parser.add_argument(
-      "-te",
-      "--tokenendpoint",
-      type=str,
-      required=True,
-      help="token endpoint")
+      "-ti", "--tenantid", type=str, required=True, help="tenant id")
   parser.add_argument(
-      "-ci",
-      "--clientid",
-      type=str,
-      required=True,
-      help="client id")
+      "-ci", "--clientid", type=str, required=True, help="client id")
   parser.add_argument(
-      "-cs",
-      "--clientsecret",
-      type=str,
-      required=True,
-      help="client secret")
+      "-cs", "--clientsecret", type=str, required=True, help="client secret")
   parser.add_argument(
       "-rd",
       "--retrievedevices",
@@ -132,8 +120,8 @@ if __name__ == "__main__":
   args = parser.parse_args()
   CHRONICLE_API_BASE_URL = regions.url(CHRONICLE_API_BASE_URL, args.region)
   session = chronicle_auth.initialize_http_session(args.credentials_file)
-  new_feed = create_azure_ad_context_feed(session, args.tokenendpoint,
-                                          args.clientid, args.clientsecret,
+  new_feed = create_azure_ad_context_feed(session, args.tenantid, args.clientid,
+                                          args.clientsecret,
                                           args.retrievedevices,
                                           args.retrievegroups)
   print(json.dumps(new_feed, indent=2))
