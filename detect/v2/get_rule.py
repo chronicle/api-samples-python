@@ -70,6 +70,7 @@ def get_rule(http_session: requests.AuthorizedSession,
   #   "compilationState": "SUCCEEDED"/"FAILED",
   #   "compilationError": "<error_message>", <-- IFF compilation failed.
   #   "archivedTime": "yyyy-mm-ddThh:mm:ss.ssssssZ", <-- IFF archived.
+  #   "ruleType": "MULTI_EVENT"/"SINGLE_EVENT",
   # }
 
   if response.status_code >= 400:

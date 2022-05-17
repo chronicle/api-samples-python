@@ -84,6 +84,7 @@ def list_rule_versions(
   #       "compilationState": "SUCCEEDED"/"FAILED",
   #       "compilationError": "<error_message>", <-- IFF compilation failed.
   #       "archivedTime": "yyyy-mm-ddThh:mm:ss.ssssssZ", <-- IFF archived.
+  #       "ruleType": "MULTI_EVENT"/"SINGLE_EVENT",
   #     },
   #     ...
   #   ],
