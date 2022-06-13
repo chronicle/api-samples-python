@@ -29,10 +29,10 @@ from google.auth.transport import requests
 from common import chronicle_auth
 from common import regions
 
-CHRONICLE_API_BASE_URL = "https://backstory.googleapis.com"
 
 
 def list_rules(
+    url: str,
     http_session: requests.AuthorizedSession,
     page_size: int = 0,
     page_token: str = "",
@@ -59,11 +59,12 @@ def list_rules(
     requests.exceptions.HTTPError: HTTP request resulted in an error
       (response.status_code >= 400).
   """
-  url = f"{CHRONICLE_API_BASE_URL}/v2/detect/rules"
+  url = f"{url}/v2/detect/rules"
   params_list = [("page_size", page_size), ("page_token", page_token),
                  ("state", archive_state)]
   params = {k: v for k, v in params_list if v}
 
+  print(f"url:{url}")
   response = http_session.request("GET", url, params=params)
   # Expected server response:
   # {
@@ -99,6 +100,7 @@ def list_rules(
 
 
 if __name__ == "__main__":
+  CHRONICLE_API_BASE_URL = "https://backstory.googleapis.com"
   parser = argparse.ArgumentParser()
   chronicle_auth.add_argument_credentials_file(parser)
   regions.add_argument_region(parser)

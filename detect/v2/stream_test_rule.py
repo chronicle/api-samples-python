@@ -41,9 +41,6 @@ _LOGGER_ = logging.getLogger("stream_test_rule")
 # A Result is a either a detection or rule execution error.
 Result = Mapping[str, Any]
 
-CHRONICLE_API_BASE_URL = "https://backstory.googleapis.com"
-
-
 def parse_stream(
     response: requests.requests.Response) -> Iterator[Mapping[str, Any]]:
   """Parses a stream response containing one result.
@@ -113,7 +110,7 @@ def parse_stream(
 def stream_test_rule(
     http_session: requests.AuthorizedSession,
     req_data: Mapping[str,
-                      Any]) -> Tuple[Sequence[Result], Sequence[Result], str]:
+                      Any], url) -> Tuple[Sequence[Result], Sequence[Result], str]:
   """Makes one call to stream_test_rule, and runs until disconnection.
 
   Each call to stream_test_rule streams all detections/rule execution errors
@@ -190,7 +187,7 @@ def stream_test_rule(
     Tuple containing (all detections successfully streamed back, all rule
     execution errors successfully streamed back, disconnection reason)
   """
-  url = f"{CHRONICLE_API_BASE_URL}/v2/detect/rules:streamTestRule"
+  url = f"{url}/v2/detect/rules:streamTestRule"
 
   detections = []
   execution_errors = []
@@ -256,7 +253,8 @@ def test_rule(http_session: requests.AuthorizedSession,
               rule_content: str,
               event_start_time: datetime.datetime,
               event_end_time: datetime.datetime,
-              max_results: int = 0):
+              max_results: int = 0,
+              url: str = ""):
   """Calls stream_test_rule once to test rule.
 
   Args:
@@ -279,7 +277,7 @@ def test_rule(http_session: requests.AuthorizedSession,
       "max_results": max_results
   }
 
-  dets, errs, disconnection_reason = stream_test_rule(http_session, req_data)
+  dets, errs, disconnection_reason = stream_test_rule(http_session, req_data, url)
 
   # Print out the total number of detections/rule execution errors
   # that were successfully found from testing the rule, up to the point
@@ -292,6 +290,7 @@ def test_rule(http_session: requests.AuthorizedSession,
 
 
 if __name__ == "__main__":
+  chronicle_api_base_url = "https://backstory.googleapis.com"
   parser = argparse.ArgumentParser()
   chronicle_auth.add_argument_credentials_file(parser)
   regions.add_argument_region(parser)
@@ -323,7 +322,7 @@ if __name__ == "__main__":
       help="maximum number of detections to stream back")
 
   args = parser.parse_args()
-  CHRONICLE_API_BASE_URL = regions.url(CHRONICLE_API_BASE_URL, args.region)
+  chronicle_api_base_url = regions.url(chronicle_api_base_url, args.region)
   session = chronicle_auth.initialize_http_session(args.credentials_file)
   test_rule(session, args.rule_file.read(), args.event_start_time,
-            args.event_end_time, args.max_results)
+            args.event_end_time, args.max_results, chronicle_api_base_url)
