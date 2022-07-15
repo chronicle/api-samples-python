@@ -50,9 +50,18 @@ def initialize_command_line_args(
       required=True,
       help="Topic in format projects/<project_id>/topics/<topicId>")
   parser.add_argument(
-      "-f", "--filter", type=str, required=True, help="filter Type")
+      "-f",
+      "--filter",
+      type=str,
+      required=True,
+      help="filter Type, Options: ALL_UDM_EVENTS/ALERT_UDM_EVENTS")
   parser.add_argument(
-      "-id", "--tapId", type=str, required=True, help="tap Id")
+      "-sf",
+      "--serialization_format",
+      type=str,
+      required=False,
+      help="serialization Format, Options : MARSHALLED_PROTO/JSON")
+  parser.add_argument("-id", "--tapId", type=str, required=True, help="tap Id")
 
   # Sanity check for the filter type.
   parsed_args = parser.parse_args(args)
@@ -66,6 +75,7 @@ def initialize_command_line_args(
 def update_datatap(http_session: requests.AuthorizedSession, name: str,
                    topic: str,
                    filter_type: str,
+                   serialization_format: str,
                    tap_id: str) -> Mapping[str, Sequence[Any]]:
   """Update a datatap.
 
@@ -75,6 +85,8 @@ def update_datatap(http_session: requests.AuthorizedSession, name: str,
     topic: topicId of the pubsub topic where events should be published.
     filter_type: The filter type to filter events, e.g., ALL_UDM_EVENTS
       or ALERT_UDM_EVENTS.
+    serialization_format: The serialization format in which events are
+      needed, e.g., MARSHALLED_PROTO or JSON.
     tap_id: unique datatap Id returned on Datatap creation.
 
   Returns:
@@ -83,9 +95,10 @@ def update_datatap(http_session: requests.AuthorizedSession, name: str,
       "customerId": "cccccccc-cccc-cccc-cccc-cccccccccccc",
       "tapId": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
       "displayName": "tap1",
+      "filter": "ALL_UDM_EVENTS",
+      "serializationFormat": "MARSHALLED_PROTO",
       "cloudPubsubSink": {
         "topic": "projects/sample-project/topics/sample-topic",
-        "filter": "ALL_UDM_EVENTS"
       }
     }
 
@@ -102,7 +115,8 @@ def update_datatap(http_session: requests.AuthorizedSession, name: str,
       "cloudPubsubSink": {
           "topic": topic,
       },
-      "filter": filter_type
+      "filter": filter_type,
+      "serializationFormat": serialization_format
   }
 
   response = http_session.request("PATCH", url, json=body)
@@ -122,5 +136,6 @@ if __name__ == "__main__":
   session = chronicle_auth.initialize_http_session(cli.credentials_file)
   print(
       json.dumps(
-          update_datatap(session, cli.name, cli.topic, cli.filter, cli.tapId),
+          update_datatap(session, cli.name, cli.topic, cli.filter,
+                         cli.serialization_format, cli.tapId),
           indent=2))

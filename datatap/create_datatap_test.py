@@ -29,7 +29,7 @@ class CreateDatatapTest(unittest.TestCase):
   def test_initialize_command_line_args(self):
     actual = create_datatap.initialize_command_line_args([
         "--name=sink1", "--topic=projects/sample-project/topics/sample-topic",
-        "--filter=ALL_UDM_EVENTS"
+        "--filter=ALL_UDM_EVENTS", "--serialization_format=JSON"
     ])
     self.assertEqual(
         actual,
@@ -38,6 +38,7 @@ class CreateDatatapTest(unittest.TestCase):
             name="sink1",
             topic="projects/sample-project/topics/sample-topic",
             filter="ALL_UDM_EVENTS",
+            serialization_format="JSON",
             region="us"))
 
   def test_initialize_command_line_args_filter_type(self):
@@ -46,6 +47,22 @@ class CreateDatatapTest(unittest.TestCase):
         "--filter=INVALID_FILTER"
     ])
     self.assertIsNone(actual)
+
+  def test_initialize_command_line_args_filter_missing(self):
+    with self.assertRaises(SystemExit) as error:
+      create_datatap.initialize_command_line_args([
+          "--name=sink1",
+          "--topic=projects/sample-project/topics/sample-topic",
+      ])
+    self.assertEqual(error.exception.code, 2)
+
+  def test_initialize_command_line_args_name_missing(self):
+    with self.assertRaises(SystemExit) as error:
+      create_datatap.initialize_command_line_args([
+          "--topic=projects/sample-project/topics/sample-topic",
+          "--filter=ALL_UDM_EVENTS",
+      ])
+    self.assertEqual(error.exception.code, 2)
 
   @mock.patch.object(requests, "AuthorizedSession", autospec=True)
   @mock.patch.object(requests.requests, "Response", autospec=True)
@@ -56,7 +73,7 @@ class CreateDatatapTest(unittest.TestCase):
         requests.requests.exceptions.HTTPError())
 
     with self.assertRaises(requests.requests.exceptions.HTTPError):
-      create_datatap.create_datatap(mock_session, "", "", "")
+      create_datatap.create_datatap(mock_session, "", "", "", "")
 
   @mock.patch.object(requests, "AuthorizedSession", autospec=True)
   @mock.patch.object(requests.requests, "Response", autospec=True)
@@ -66,19 +83,21 @@ class CreateDatatapTest(unittest.TestCase):
     name = "tap1"
     topic = "projects/sample-project/topics/sample-topic"
     filter_type = "ALL_UDM_EVENTS"
+    serialization_format = "JSON"
     expected = {
         "customerId": "cccccccc-cccc-cccc-cccc-cccccccccccc",
         "tapId": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
         "displayName": "tap1",
+        "filter": "ALL_UDM_EVENTS",
+        "serializationFormat": "JSON",
         "cloudPubsubSink": {
             "topic": "projects/sample-project/topics/sample-topic",
-            "filter": "ALL_UDM_EVENTS"
         }
     }
 
     mock_response.json.return_value = expected
-    actual = create_datatap.create_datatap(mock_session, name,
-                                           topic, filter_type)
+    actual = create_datatap.create_datatap(mock_session, name, topic,
+                                           filter_type, serialization_format)
     self.assertEqual(actual, expected)
 
 

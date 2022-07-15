@@ -30,6 +30,7 @@ class UpdateDatatapTest(unittest.TestCase):
     actual = update_datatap.initialize_command_line_args([
         "--name=sink1", "--topic=projects/sample-project/topics/sample-topic",
         "--filter=ALL_UDM_EVENTS",
+        "--serialization_format=JSON",
         "--tapId=aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
     ])
     self.assertEqual(
@@ -39,6 +40,7 @@ class UpdateDatatapTest(unittest.TestCase):
             name="sink1",
             topic="projects/sample-project/topics/sample-topic",
             filter="ALL_UDM_EVENTS",
+            serialization_format="JSON",
             tapId="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
             region="us"))
 
@@ -50,6 +52,33 @@ class UpdateDatatapTest(unittest.TestCase):
     ])
     self.assertIsNone(actual)
 
+  def test_initialize_command_line_args_tap_id_missing(self):
+    with self.assertRaises(SystemExit) as error:
+      update_datatap.initialize_command_line_args([
+          "--name=sink1",
+          "--topic=projects/sample-project/topics/sample-topic",
+          "--filter=ALL_UDM_EVENTS",
+      ])
+    self.assertEqual(error.exception.code, 2)
+
+  def test_initialize_command_line_args_filter_missing(self):
+    with self.assertRaises(SystemExit) as error:
+      update_datatap.initialize_command_line_args([
+          "--name=sink1",
+          "--topic=projects/sample-project/topics/sample-topic",
+          "--tapId=aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+      ])
+    self.assertEqual(error.exception.code, 2)
+
+  def test_initialize_command_line_args_name_missing(self):
+    with self.assertRaises(SystemExit) as error:
+      update_datatap.initialize_command_line_args([
+          "--topic=projects/sample-project/topics/sample-topic",
+          "--tapId=aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+          "--filter=ALL_UDM_EVENTS",
+      ])
+    self.assertEqual(error.exception.code, 2)
+
   @mock.patch.object(requests, "AuthorizedSession", autospec=True)
   @mock.patch.object(requests.requests, "Response", autospec=True)
   def test_update_datatap_error(self, mock_response, mock_session):
@@ -59,7 +88,7 @@ class UpdateDatatapTest(unittest.TestCase):
         requests.requests.exceptions.HTTPError())
 
     with self.assertRaises(requests.requests.exceptions.HTTPError):
-      update_datatap.update_datatap(mock_session, "", "", "", "")
+      update_datatap.update_datatap(mock_session, "", "", "", "", "")
 
   @mock.patch.object(requests, "AuthorizedSession", autospec=True)
   @mock.patch.object(requests.requests, "Response", autospec=True)
@@ -69,23 +98,26 @@ class UpdateDatatapTest(unittest.TestCase):
     name = "tap1"
     topic = "projects/sample-project/topics/sample-topic"
     filter_type = "ALL_UDM_EVENTS"
+    serialization_format = "JSON"
     tap_id = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
     expected = {
         "customerId": "cccccccc-cccc-cccc-cccc-cccccccccccc",
         "tapId": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
         "displayName": "tap1",
+        "filter": "ALL_UDM_EVENTS",
+        "serializationFormat": "JSON",
         "cloudPubsubSink": {
             "topic": "projects/sample-project/topics/sample-topic",
-            "filter": "ALL_UDM_EVENTS"
         }
     }
 
     mock_response.json.return_value = expected
-    actual = update_datatap.update_datatap(mock_session, name,
-                                           topic, filter_type, tap_id)
+    actual = update_datatap.update_datatap(mock_session, name, topic,
+                                           filter_type, serialization_format,
+                                           tap_id)
     self.assertEqual(actual, expected)
 
 
 if __name__ == "__main__":
   unittest.main()
-  
+
