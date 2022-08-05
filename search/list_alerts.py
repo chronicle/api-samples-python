@@ -45,12 +45,14 @@ def initialize_command_line_args(
       "-ts",
       "--start_time",
       type=datetime_converter.iso8601_datetime_utc,
+      required=True,
       help=("beginning of time range, as an ISO 8601 string " +
             "('yyyy-mm-ddThh:mm:ss')"))
   parser.add_argument(
       "-te",
       "--end_time",
       type=datetime_converter.iso8601_datetime_utc,
+      required=True,
       help=("end of time range, as an ISO 8601 string ('yyyy-mm-ddThh:mm:ss')"))
   parser.add_argument(
       "-tl",
