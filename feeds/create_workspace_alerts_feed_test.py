@@ -36,7 +36,7 @@ class CreateFeedTest(unittest.TestCase):
       create_workspace_alerts_feed.create_workspace_alerts_feed(
           mock_session, "hostname.example.com", "issuer_example",
           "subject_example", "audience_example", "privatekey_example",
-          "Ccustomerid_example")
+          "Ccustomerid_example", "my feed name")
 
   @mock.patch.object(requests, "AuthorizedSession", autospec=True)
   @mock.patch.object(requests.requests, "Response", autospec=True)
@@ -45,6 +45,7 @@ class CreateFeedTest(unittest.TestCase):
     type(mock_response).status_code = mock.PropertyMock(return_value=200)
     expected_feed = {
         "name": "feeds/cf91de35-1256-48f5-8a36-9503e532b879",
+        "display_name": "my feed name",
         "details": {
             "logType": "WORKSPACE_ALERTS",
             "feedSourceType": "API",
@@ -71,7 +72,7 @@ class CreateFeedTest(unittest.TestCase):
     actual_feed = create_workspace_alerts_feed.create_workspace_alerts_feed(
         mock_session, "hostname.example.com", "issuer_example",
         "subject_example", "audience_example", "privatekey_example",
-        "customerid_example")
+        "customerid_example", "my feed name")
     self.assertEqual(actual_feed, expected_feed)
 
 
