@@ -33,13 +33,15 @@ CHRONICLE_API_BASE_URL = "https://backstory.googleapis.com"
 
 def create_okta_user_context_feed(http_session: requests.AuthorizedSession,
                                   secret: str,
-                                  hostname: str) -> Mapping[str, Any]:
+                                  hostname: str,
+                                  displayname: str) -> Mapping[str, Any]:
   """Creates a new Okta User Context feed.
 
   Args:
     http_session: Authorized session for HTTP requests.
     secret: A string which represents Okta auth user's secret.
     hostname: A string which represents hostname to connect to.
+    displayname: A string which represents customer-provided feed name.
 
   Returns:
     New Okta Feed.
@@ -62,13 +64,15 @@ def create_okta_user_context_feed(http_session: requests.AuthorizedSession,
               },
               "hostname": hostname
           }
-      }
+      },
+      "display_name": displayname,
   }
 
   response = http_session.request("POST", url, json=body)
   # Expected server response:
   # {
   #   "name": "feeds/7c420442-6b73-439e-ae8b-563618b8fc71",
+  #   "display_name": "my feed name",
   #   "details": {
   #     "logType": "OKTA_USER_CONTEXT",
   #     "feedSourceType": "API",
@@ -109,9 +113,16 @@ if __name__ == "__main__":
       type=str,
       required=True,
       help="hostname")
+  parser.add_argument(
+      "-dn",
+      "--displayname",
+      type=str,
+      required=False,
+      help="display name")
 
   args = parser.parse_args()
   CHRONICLE_API_BASE_URL = regions.url(CHRONICLE_API_BASE_URL, args.region)
   session = chronicle_auth.initialize_http_session(args.credentials_file)
-  new_feed = create_okta_user_context_feed(session, args.secret, args.hostname)
+  new_feed = create_okta_user_context_feed(session, args.secret, args.hostname,
+                                           args.displayname)
   print(json.dumps(new_feed, indent=2))
