@@ -45,6 +45,7 @@ class CreateFeedTest(unittest.TestCase):
     type(mock_response).status_code = mock.PropertyMock(return_value=200)
     expected_feed = {
         "name": "feeds/cf91de35-1256-48f5-8a36-9503e532b879",
+        "display_name": "my feed name",
         "details": {
             "logType": "WORKSPACE_ACTIVITY",
             "feedSourceType": "API",
