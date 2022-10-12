@@ -35,7 +35,8 @@ def create_workspace_activity_feed(http_session: requests.AuthorizedSession,
                                    tokenendpoint: str, issuer: str,
                                    subject: str, audience: str, privatekey: str,
                                    workspacecustomerid: str,
-                                   applications: str) -> Mapping[str, Any]:
+                                   applications: str, displayname: str
+                                   ) -> Mapping[str, Any]:
   """Creates a new Workspace Activity feed.
 
   Args:
@@ -49,6 +50,7 @@ def create_workspace_activity_feed(http_session: requests.AuthorizedSession,
         http://phpseclib.sourceforge.net/rsa/examples.html
     workspacecustomerid: A string which represents workspace customer id.
     applications: A string which represents list of applications to be allowed.
+    displayname: A string which represents customer-provided feed name.
 
   Returns:
     New Workspace Activity Feed.
@@ -79,13 +81,15 @@ def create_workspace_activity_feed(http_session: requests.AuthorizedSession,
                   applications
               ]
           }
-      }
+      },
+      "display_name": displayname,
   }
 
   response = http_session.request("POST", url, json=body)
   # Expected server response:
   # {
   #   "name": "feeds/cf91de35-1256-48f5-8a36-9503e532b879",
+  #   "display_name": "my feed name",
   #   "details": {
   #     "logType": "WORKSPACE_ACTIVITY",
   #     "feedSourceType": "API",
@@ -162,6 +166,12 @@ if __name__ == "__main__":
       type=str,
       required=True,
       help="applications")
+  parser.add_argument(
+      "-dn",
+      "--displayname",
+      type=str,
+      required=False,
+      help="display name")
 
   args = parser.parse_args()
   CHRONICLE_API_BASE_URL = regions.url(CHRONICLE_API_BASE_URL, args.region)
@@ -169,5 +179,5 @@ if __name__ == "__main__":
   new_feed = create_workspace_activity_feed(
       session, args.tokenendpoint, args.claimsissuer, args.claimssubject,
       args.claimsaudience, args.credentialsprivatekey, args.workspacecustomerid,
-      args.applications)
+      args.applications, args.displayname)
   print(json.dumps(new_feed, indent=2))

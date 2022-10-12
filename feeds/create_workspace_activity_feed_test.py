@@ -36,7 +36,7 @@ class CreateFeedTest(unittest.TestCase):
       create_workspace_activity_feed.create_workspace_activity_feed(
           mock_session, "hostname.example.com", "issuer_example",
           "subject_example", "audience_example", "privatekey_example",
-          "customerid_example", "applications_example")
+          "customerid_example", "applications_example", "my feed name")
 
   @mock.patch.object(requests, "AuthorizedSession", autospec=True)
   @mock.patch.object(requests.requests, "Response", autospec=True)
@@ -72,7 +72,7 @@ class CreateFeedTest(unittest.TestCase):
     actual_feed = create_workspace_activity_feed.create_workspace_activity_feed(
         mock_session, "hostname.example.com", "issuer_example",
         "subject_example", "audience_example", "privatekey_example",
-        "customerid_example", "applications_example")
+        "customerid_example", "applications_example", "my feed name")
     self.assertEqual(actual_feed, expected_feed)
 
 
