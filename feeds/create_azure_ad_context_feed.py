@@ -34,7 +34,8 @@ CHRONICLE_API_BASE_URL = "https://backstory.googleapis.com"
 def create_azure_ad_context_feed(http_session: requests.AuthorizedSession,
                                  tenantid: str, clientid: str,
                                  clientsecret: str, retrievedevices: bool,
-                                 retrievegroups: bool) -> Mapping[str, Any]:
+                                 retrievegroups: bool, displayname: str
+                                 ) -> Mapping[str, Any]:
   """Creates a new Azure AD Context feed.
 
   Args:
@@ -44,6 +45,7 @@ def create_azure_ad_context_feed(http_session: requests.AuthorizedSession,
     clientsecret: A string which represents secret of the credential to use.
     retrievedevices: A boolean to indicate whether to retrieve devices or not.
     retrievegroups: A boolean to indicate whether to retrieve groups or not.
+    displayname: A string which describes the feed.
 
   Returns:
     New Azure AD Feed.
@@ -66,13 +68,15 @@ def create_azure_ad_context_feed(http_session: requests.AuthorizedSession,
               "retrieveGroups": retrievegroups,
               "tenantId": tenantid,
           }
-      }
+      },
+      "display_name": displayname,
   }
 
   response = http_session.request("POST", url, json=body)
   # Expected server response:
   # {
   #   "name": "feeds/e0eb5fb0-8fbd-4f0f-b063-710943ad7812",
+  #   "display_name": "my feed name",
   #   "details": {
   #     "logType": "AZURE_AD_CONTEXT",
   #     "feedSourceType": "API",
@@ -116,6 +120,12 @@ if __name__ == "__main__":
       type=str,
       required=True,
       help="retrieve groups")
+  parser.add_argument(
+      "-dn",
+      "--displayname",
+      type=str,
+      required=False,
+      help="display name")
 
   args = parser.parse_args()
   CHRONICLE_API_BASE_URL = regions.url(CHRONICLE_API_BASE_URL, args.region)
@@ -123,5 +133,6 @@ if __name__ == "__main__":
   new_feed = create_azure_ad_context_feed(session, args.tenantid, args.clientid,
                                           args.clientsecret,
                                           args.retrievedevices,
-                                          args.retrievegroups)
+                                          args.retrievegroups,
+                                          args.displayname)
   print(json.dumps(new_feed, indent=2))

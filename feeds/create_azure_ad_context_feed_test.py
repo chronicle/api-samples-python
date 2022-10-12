@@ -35,7 +35,7 @@ class CreateFeedTest(unittest.TestCase):
     with self.assertRaises(requests.requests.exceptions.HTTPError):
       create_azure_ad_context_feed.create_azure_ad_context_feed(
           mock_session, "tokenendpoint.example.com", "clientid_example",
-          "clientsecret_example", False, False)
+          "clientsecret_example", False, False, "my feed name")
 
   @mock.patch.object(requests, "AuthorizedSession", autospec=True)
   @mock.patch.object(requests.requests, "Response", autospec=True)
@@ -44,6 +44,7 @@ class CreateFeedTest(unittest.TestCase):
     type(mock_response).status_code = mock.PropertyMock(return_value=200)
     expected_feed = {
         "name": "feeds/cf49ebc5-e7bf-4562-8061-cab43cecba35",
+        "display_name": "my feed name",
         "details": {
             "logType": "AZURE_AD",
             "feedSourceType": "API",
@@ -64,7 +65,7 @@ class CreateFeedTest(unittest.TestCase):
 
     actual_feed = create_azure_ad_context_feed.create_azure_ad_context_feed(
         mock_session, "tokenendpoint.example.com", "clientid_example",
-        "clientsecret_example", False, False)
+        "clientsecret_example", False, False, "my feed name")
     self.assertEqual(actual_feed, expected_feed)
 
 
