@@ -34,7 +34,7 @@ class CreateFeedTest(unittest.TestCase):
 
     with self.assertRaises(requests.requests.exceptions.HTTPError):
       create_okta_feed.create_okta_feed(mock_session, "secret_example",
-                                        "hostname.example.com")
+                                        "hostname.example.com", "my feed name")
 
   @mock.patch.object(requests, "AuthorizedSession", autospec=True)
   @mock.patch.object(requests.requests, "Response", autospec=True)
@@ -43,6 +43,7 @@ class CreateFeedTest(unittest.TestCase):
     type(mock_response).status_code = mock.PropertyMock(return_value=200)
     expected_feed = {
         "name": "feeds/cf49ebc5-e7bf-4562-8061-cab43cecba35",
+        "display_name": "my feed name",
         "details": {
             "logType": "OKTA",
             "feedSourceType": "API",
@@ -61,7 +62,7 @@ class CreateFeedTest(unittest.TestCase):
     mock_response.json.return_value = expected_feed
 
     actual_feed = create_okta_feed.create_okta_feed(
-        mock_session, "secret_example", "hostname.example.com")
+        mock_session, "secret_example", "hostname.example.com", "my feed name")
     self.assertEqual(actual_feed, expected_feed)
 
 
