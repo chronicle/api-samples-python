@@ -33,7 +33,8 @@ CHRONICLE_API_BASE_URL = "https://backstory.googleapis.com"
 
 def create_azure_ad_feed(http_session: requests.AuthorizedSession,
                          tenantid: str, clientid: str,
-                         clientsecret: str) -> Mapping[str, Any]:
+                         clientsecret: str, displayname: str
+                         ) -> Mapping[str, Any]:
   """Creates a new Azure AD feed.
 
   Args:
@@ -41,6 +42,7 @@ def create_azure_ad_feed(http_session: requests.AuthorizedSession,
     tenantid: A string which represents the tenant id.
     clientid: A string which represents Id of the credential to use.
     clientsecret: A string which represents secret of the credential to use.
+    displayname: A string which describes the feed.
 
   Returns:
     New Azure AD Feed.
@@ -61,13 +63,15 @@ def create_azure_ad_feed(http_session: requests.AuthorizedSession,
               },
               "tenantId": tenantid,
           }
-      }
+      },
+      "display_name": displayname,
   }
 
   response = http_session.request("POST", url, json=body)
   # Expected server response:
   #   {
   #   "name": "feeds/cf49ebc5-e7bf-4562-8061-cab43cecba35",
+  #   "display_name": "my feed name",
   #   "details": {
   #     "logType": "AZURE_AD",
   #     "feedSourceType": "API",
@@ -98,10 +102,13 @@ if __name__ == "__main__":
       "-ci", "--clientid", type=str, required=True, help="client id")
   parser.add_argument(
       "-cs", "--clientsecret", type=str, required=True, help="client secret")
+  parser.add_argument(
+      "-dn", "--displayname", type=str, required=False,
+      help="display name")
 
   args = parser.parse_args()
   CHRONICLE_API_BASE_URL = regions.url(CHRONICLE_API_BASE_URL, args.region)
   session = chronicle_auth.initialize_http_session(args.credentials_file)
   new_feed = create_azure_ad_feed(session, args.tenantid, args.clientid,
-                                  args.clientsecret)
+                                  args.clientsecret, args.displayname)
   print(json.dumps(new_feed, indent=2))
