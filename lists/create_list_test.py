@@ -34,7 +34,7 @@ class CreateListTest(unittest.TestCase):
 
     with self.assertRaises(requests.requests.exceptions.HTTPError):
       create_list.create_list(mock_session, "name", "description",
-                              ["content line"])
+                              ["content line"], "CONTENT_TYPE_DEFAULT_STRING")
 
   @mock.patch.object(requests, "AuthorizedSession", autospec=True)
   @mock.patch.object(requests.requests, "Response", autospec=True)
@@ -46,13 +46,15 @@ class CreateListTest(unittest.TestCase):
         "name": "name",
         "description": "description",
         "lines": ["content line 1", "content line 2"],
+        "contentType": "CONTENT_TYPE_DEFAULT_STRING",
         "createTime": expected_create_time
     }
     mock_response.json.return_value = expected_list
 
     actual_create_time = create_list.create_list(
         mock_session, "name", "description",
-        ["content line 1", "content line 2"])
+        ["content line 1", "content line 2"],
+        "CONTENT_TYPE_DEFAULT_STRING",)
     self.assertEqual(actual_create_time, expected_create_time)
 
 

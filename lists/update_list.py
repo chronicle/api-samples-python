@@ -29,7 +29,8 @@ CHRONICLE_API_BASE_URL = "https://backstory.googleapis.com"
 
 def update_list(http_session: requests.AuthorizedSession, name: str,
                 description: Optional[str],
-                content_lines: Sequence[str]) -> str:
+                content_lines: Sequence[str],
+                content_type: str) -> str:
   """Updates a list.
 
   Args:
@@ -37,6 +38,7 @@ def update_list(http_session: requests.AuthorizedSession, name: str,
     name: Name of existing list.
     description: Optional new description of the list.
     content_lines: Array containing each line of the list's content.
+    content_type: Type of list content, indicating how to interpret this list.
 
   Returns:
     Timestamp of when the updated list was written.
@@ -49,6 +51,7 @@ def update_list(http_session: requests.AuthorizedSession, name: str,
   body = {
       "name": name,
       "lines": content_lines,
+      "content_type": content_type,
   }
   update_fields = ["list.lines"]
 
@@ -68,7 +71,8 @@ def update_list(http_session: requests.AuthorizedSession, name: str,
   #     "<line 1>",
   #     "<line 2>",
   #     ...
-  #   ]
+  #   ],
+  #   "contentType": "<content type. omitted if type is STRING list.>"
   # }
 
   if response.status_code >= 400:
@@ -90,6 +94,12 @@ if __name__ == "__main__":
       help="description of the list. Omit this to use previous description."
   )
   parser.add_argument(
+      "-t",
+      "--content_type",
+      type=str,
+      default="CONTENT_TYPE_DEFAULT_STRING",
+      help="type of list lines")
+  parser.add_argument(
       "-f",
       "--list_file",
       type=argparse.FileType("r"),
@@ -104,5 +114,6 @@ if __name__ == "__main__":
   CHRONICLE_API_BASE_URL = regions.url(CHRONICLE_API_BASE_URL, args.region)
   session = chronicle_auth.initialize_http_session(args.credentials_file)
   t = update_list(session, args.name, args.description,
-                  args.list_file.read().splitlines())
+                  args.list_file.read().splitlines(),
+                  args.content_type)
   print(f"List updated successfully, at {t}")

@@ -54,7 +54,8 @@ def get_list(http_session: requests.AuthorizedSession,
   #     "<line 1>",
   #     "<line 2>",
   #     ...
-  #   ]
+  #   ],
+  #   "contentType": "<content type. omitted if type is STRING list.>"
   # }
 
   if response.status_code >= 400:

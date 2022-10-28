@@ -28,7 +28,8 @@ CHRONICLE_API_BASE_URL = "https://backstory.googleapis.com"
 
 
 def create_list(http_session: requests.AuthorizedSession, name: str,
-                description: str, content_lines: Sequence[str]) -> str:
+                description: str, content_lines: Sequence[str],
+                content_type: str) -> str:
   """Creates a list.
 
   Args:
@@ -36,6 +37,7 @@ def create_list(http_session: requests.AuthorizedSession, name: str,
     name: Unique name for the list.
     description: Description of the list.
     content_lines: Array containing each line of the list's content.
+    content_type: Type of list content, indicating how to interpret this list.
 
   Returns:
     Creation timestamp of the new list.
@@ -49,6 +51,7 @@ def create_list(http_session: requests.AuthorizedSession, name: str,
       "name": name,
       "description": description,
       "lines": content_lines,
+      "content_type": content_type,
   }
 
   response = http_session.request("POST", url, json=body)
@@ -61,7 +64,8 @@ def create_list(http_session: requests.AuthorizedSession, name: str,
   #     "<line 1>",
   #     "<line 2>",
   #     ...
-  #   ]
+  #   ],
+  #   "contentType": "<content type. omitted if type is STRING list.>"
   # }
 
   if response.status_code >= 400:
@@ -83,6 +87,12 @@ if __name__ == "__main__":
       required=True,
       help="description of the list")
   parser.add_argument(
+      "-t",
+      "--content_type",
+      type=str,
+      default="CONTENT_TYPE_DEFAULT_STRING",
+      help="type of list lines")
+  parser.add_argument(
       "-f",
       "--list_file",
       type=argparse.FileType("r"),
@@ -97,5 +107,7 @@ if __name__ == "__main__":
   CHRONICLE_API_BASE_URL = regions.url(CHRONICLE_API_BASE_URL, args.region)
   session = chronicle_auth.initialize_http_session(args.credentials_file)
   new_list_create_time = create_list(session, args.name, args.description,
-                                     args.list_file.read().splitlines())
+                                     args.list_file.read().splitlines(),
+                                     args.content_type,
+                                     )
   print(f"New list created successfully, at {new_list_create_time}")

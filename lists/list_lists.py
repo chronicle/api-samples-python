@@ -65,7 +65,8 @@ def list_lists(http_session: requests.AuthorizedSession,
   #       "lines": [
   #         "rule_line",
   #         ...
-  #       ]
+  #       ],
+  #       "contentType": "<content type. omitted if type is STRING list.>"
   #     },
   #     ...
   #   ],
