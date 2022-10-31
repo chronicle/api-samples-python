@@ -169,6 +169,50 @@ class StreamDetectionAlertsTest(unittest.TestCase):
         }],
     }
 
+    mock_uppercase_detection_template = {
+        "id":
+            "PLACEHOLDER",  # To be replaced with unique ID.
+        "type":
+            "GCTI_FINDING",
+        "createdTime":
+            "2020-11-05T12:00:00Z",
+        "detectionTime":
+            "2020-11-05T01:00:00Z",
+        "timeWindow": {
+            "startTime": "2020-11-05T00:00:00Z",
+            "endTime": "2020-11-05T01:00:00Z",
+        },
+        "lastUpdatedTime": "2020-11-05T12:00:00Z",
+        "tags": ["TA0005", "TA0003", "T1098.004"],
+        "detection": [{
+            "ruleId":
+                "ur_ttp_GCP__GlobalSSHKeys_Added",
+            "ruleName":
+                "GCP Global SSH Keys",
+            "urlBackToProduct":
+                "https://chronicle.security",
+            "alertState":
+                "ALERTING",
+            "ruleType":
+                "SINGLE_EVENT",
+            "detectionFields": [{
+                "key": "fieldName",
+                "value": "fieldValue",
+            }],
+            "summary":
+                "Rule Detection",
+            "ruleSet":
+                "11c505d4-b424-65e3-d918-1a81232cc76b",
+            "ruleSetDisplayName":
+                "Admin Action",
+            "description":
+                "Identifies instances of project-wide SSH keys being added "
+                "where there were previously none.",
+            "severity":
+                "LOW"
+        }],
+    }
+
     # Prepare string representations of detection batches that can
     # passed to callback functions.
     mock_detections = []
@@ -176,6 +220,11 @@ class StreamDetectionAlertsTest(unittest.TestCase):
       mock_detection = mock_detection_template.copy()
       mock_detection["id"] = str(i)  # Not a valid ID format, just for tests.
       mock_detections.append(mock_detection)
+    mock_uppercase_detections = []
+    for i in range(5):
+      mock_detection = mock_uppercase_detection_template.copy()
+      mock_detection["id"] = str(i+7)
+      mock_uppercase_detections.append(mock_detection)
 
     mock_detection_batches = [
         # Normal stream responses, which will all be passed to the callback.
@@ -184,10 +233,14 @@ class StreamDetectionAlertsTest(unittest.TestCase):
         tuple(([], "2020-12-06T22:39:55.633014925Z")),
         tuple(([mock_detections[:3]], "2020-12-07T22:39:55.633014925Z")),
         tuple(([], "2020-12-08T22:39:55.633014925Z")),
-        tuple(([mock_detections[3:4]], "2020-12-09T22:39:55.633014925Z")),
+        tuple(([mock_detections[3:4], mock_uppercase_detections[0:3]],
+               "2020-12-09T22:39:55.633014925Z")),
         tuple(([], "2020-12-10T22:39:55.633014925Z")),
         tuple(([mock_detections[4:]], "2020-12-11T22:39:55.633014925Z")),
         tuple(([], "2020-12-12T22:39:55.633014925Z")),
+        tuple(([mock_uppercase_detections[3:]],
+               "2020-12-12T22:39:55.633014925Z")),
+        tuple(([], "2020-12-13T22:39:55.633014925Z")),
     ]
 
     # Serialize detection batches into dumps that will be sent as incremental

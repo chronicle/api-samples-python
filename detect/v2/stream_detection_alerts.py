@@ -182,15 +182,18 @@ def callback_slack_webhook(detection_batch: DetectionBatch):
   for detection in detections:
     # detection["detection"] is always a list that has one element.
     meta = detection["detection"][0]
-    detection_metadatas.append(
-        tuple((meta["ruleName"], meta["ruleId"], meta["ruleVersion"])))
+    # ruleVersion is only populated for RULE_DETECTION type detections.
+    rule_info = tuple((meta["ruleName"], meta["ruleId"], meta["ruleVersion"]
+                      )) if detection["type"] == "RULE_DETECTION" else tuple(
+                          (meta["ruleName"], meta["ruleId"]))
+    detection_metadatas.append(rule_info)
 
   for detection_metadata, count in collections.Counter(
       detection_metadatas).items():
-    report_lines.append(
-        f"\t{count} detections from Rule `{detection_metadata[0]}`" +
-        f" (Rule ID `{detection_metadata[1]}`," +
-        f" Version ID `{detection_metadata[2]}`)")
+    line = f"\t{count} detections from Rule `{detection_metadata[0]}`" + f" (Rule ID `{detection_metadata[1]}`,"
+    if len(detection_metadata) >= 3:
+      line = line + f" Version ID `{detection_metadata[2]}`)"
+    report_lines.append(line)
 
   if batch_size > MAX_BATCH_SIZE_TO_REPORT_IN_DETAIL:
     # Avoid flooding our output channels.
@@ -207,8 +210,8 @@ def callback_slack_webhook(detection_batch: DetectionBatch):
     for idx, detection in enumerate(detections):
       report_lines.append(f"{idx})")
 
-      # This for loop includes rule name, rule ID, version ID,
-      # rule type, and fields.
+      # This for loop includes rule name, rule ID, rule type, rule version,
+      # rule set and other fields.
       for meta_key, meta_value in detection["detection"][0].items():
         report_lines.append(f"\t{meta_key}: {meta_value}")
       report_lines.append(f"\tTime Window: {detection['timeWindow']}")
@@ -298,7 +301,7 @@ def stream_detection_alerts(
   The contents of a detection follow this format:
     {
       "id": "de_<UUID>",
-      "type": "RULE_DETECTION",
+      "type": "RULE_DETECTION"/"GCTI_FINDING",
       "createdTime": "yyyy-mm-ddThh:mm:ssZ",
       "detectionTime": "yyyy-mm-ddThh:mm:ssZ",
       "timeWindow": {
@@ -323,8 +326,9 @@ def stream_detection_alerts(
       ],
       "detection": [  <-- this is always a list that has one element.
         {
-          "ruleId": "ru_<UUID>",
+          "ruleId": "ru_<UUID>"/"ur_ruleID",
           "ruleName": "<rule_name>",
+          // ruleVersion is only populated for RULE_DETECTION type detections.
           "ruleVersion": "ru_<UUID>@v_<seconds>_<nanoseconds>",
           "urlBackToProduct": "<URL>",
           "alertState": "ALERTING"/"NOT_ALERTING",
@@ -334,9 +338,20 @@ def stream_detection_alerts(
               "key": "<field name>",
               "value": "<field value>"
             }
-          ]
+          ],
+          // Following fields are only populated for "GCTI_FINDING" type
+          // detections.
+          "summary": "Rule Detection",
+          "ruleSet": "<rule set ID>",
+          "ruleSetDisplayName": "<rule set display name>",
+          "description": "<rule description>",
+          "severity": "INFORMATIONAL"/"LOW"/"HIGH"
         },
       ],
+      // Following fields are only populated for "GCTI_FINDING" type
+      // detections.
+      "lastUpdatedTime": "yyyy-mm-ddThh:mm:ssZ",
+      "tags": ["<tag1>", "<tag2>", ...]
     }
 
   Args:
