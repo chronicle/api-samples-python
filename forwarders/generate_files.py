@@ -78,7 +78,6 @@ if __name__ == "__main__":
   session = chronicle_auth.initialize_http_session(args.credentials_file)
   res = generate_files(session, args.name)
 
-  verbose = args.verbose
   output_dir = args.output
   if "config" in res:
     config = res["config"]
