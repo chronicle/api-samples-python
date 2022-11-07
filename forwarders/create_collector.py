@@ -149,5 +149,5 @@ if __name__ == "__main__":
   args = parser.parse_args()
   CHRONICLE_API_BASE_URL = regions.url(CHRONICLE_API_BASE_URL, args.region)
   session = chronicle_auth.initialize_http_session(args.credentials_file)
-  new_forwarder = create_collector(session, args.forwarder)
+  new_forwarder = create_collector(session, args.forwarder_name)
   print(json.dumps(new_forwarder, indent=2))
