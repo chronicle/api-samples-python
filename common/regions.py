@@ -28,7 +28,7 @@ def add_argument_region(parser: argparse.ArgumentParser):
       type=str,
       required=False,
       default="us",
-      choices=("asia-southeast1", "europe", "us"),
+      choices=("asia-southeast1", "europe", "us", "europe-west2"),
       help="the region where the customer is located (default: us)")
 
 
