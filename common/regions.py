@@ -28,8 +28,15 @@ def add_argument_region(parser: argparse.ArgumentParser):
       type=str,
       required=False,
       default="us",
-      choices=("asia-southeast1", "europe", "us", "europe-west2"),
-      help="the region where the customer is located (default: us)")
+      choices=(
+          "asia-southeast1",
+          "europe",
+          "us",
+          "europe-west2",
+          "australia-southeast1",
+      ),
+      help="the region where the customer is located (default: us)",
+  )
 
 
 def url(base_url: str, region: str) -> str:
