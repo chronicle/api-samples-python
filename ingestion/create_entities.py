@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# TODO(b/193595445): Add documentation link for enetity format once it's done.
+# TODO(b/193595445): Add documentation link for entity format once it's done.
 r"""Executable and reusable sample for ingesting entities.
 
 WARNING: This script makes use of the Ingestion API V2. V2 is currently only in

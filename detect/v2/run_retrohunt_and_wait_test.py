@@ -134,7 +134,7 @@ class RunRetrohuntAndWaitTest(unittest.TestCase):
             "0.0",
     }
 
-    # We'll call run_retrohunt_and_wait with sleep_secounds=2,
+    # We'll call run_retrohunt_and_wait with sleep_seconds=2,
     # timeout_minutes 0.05(=3sec). With this setup, we make 2 GetRetrohunt calls
     # and exit the loop.
     # Flow in the loop will be: sleep 2sec -> call GetRetrohunt ->
@@ -146,7 +146,7 @@ class RunRetrohuntAndWaitTest(unittest.TestCase):
     running_rh3 = running_rh.copy()
     running_rh3["progressPercentage"] = "20.0"
 
-    # Order of reponses
+    # Order of responses
     # 1. RunRetrohunt
     # 2. 1st call for GetRetrohunt
     # 3. 2nd call for GetRetrohunt

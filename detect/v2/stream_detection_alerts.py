@@ -125,7 +125,7 @@ def parse_stream(
     yield {
         "error": {
             "code": 500,
-            "status": "UNAVAILBLE",
+            "status": "UNAVAILABLE",
             "message": "exception caught while reading stream response (your "
                        "streaming client should retry connection): {}".format(
                            repr(e)),

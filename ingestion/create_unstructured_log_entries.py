@@ -26,7 +26,7 @@ flag). See ./example_input/sample_unstructured_log_entries.txt for an example
 log for the BIND_DNS log type.
 
 So, assuming you're created a credentials file at ~/.chronicle_credentials.json,
-you can run this command using the sample imput like so:
+you can run this command using the sample input like so:
 
 $ create_unstructured_log_entries --customer_id=<your customer UUID> \
   --log_type=BIND_DNS \
