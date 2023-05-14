@@ -32,7 +32,7 @@ array of JSON formatted events in UDM format. See
 ./example_input/sample_udm_events.json for an example.
 
 So, assuming you've created a credentials file at ~/.chronicle_credentials.json,
-you can run this command using the sample imput like so:
+you can run this command using the sample input like so:
 
 $ create_udm_events --customer_id=<your customer UUID> \
   --json_events_file=./example_input/sample_udm_events.json
