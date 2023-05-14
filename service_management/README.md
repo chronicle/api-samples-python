@@ -10,7 +10,7 @@ to authenticate a service account under your GCP organization.
 ### Environment Variables Setup
 
 1. Go to the Google Cloud Console.
-2. Activate Cloud Chell.
+2. Activate Cloud Shell.
 3. Set environment variables by running:
    a. Set your organization name:
    ```
