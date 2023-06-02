@@ -124,10 +124,12 @@ def parse_stream(
     # and retry limit).
     yield {
         "error": {
-            "code": 500,
+            "code": 503,
             "status": "UNAVAILBLE",
-            "message": "exception caught while reading stream response (your "
-                       "streaming client should retry connection): {}".format(
+            "message": "exception caught while reading stream response. This "
+                       "python client is catching all errors and is returning "
+                       "error code 503 as a catch-all. The original error "
+                       "message is as follows: {}".format(
                            repr(e)),
         }
     }

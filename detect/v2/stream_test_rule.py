@@ -102,10 +102,12 @@ def parse_stream(
     # so the client may report the error.
     yield {
         "error": {
-            "code": 500,
+            "code": 503,
             "status": "UNAVAILABLE",
-            "message": "exception caught while reading "
-                       "stream response: {}".format(repr(e)),
+            "message": "exception caught while reading stream response. This "
+                       "python client is catching all errors and is returning "
+                       "error code 503 as a catch-all. The original error "
+                       "message is as follows: {}".format(repr(e)),
         }
     }
 

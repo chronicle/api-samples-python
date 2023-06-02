@@ -104,9 +104,9 @@ class StreamTestRuleTest(unittest.TestCase):
     # This error should not be considered a rule execution error,
     # and should stop any further stream processing.
     mock_stream_error = {
-        "code": 500,
+        "code": 503,
         "status": "UNAVAILABLE",
-        "message": "exception caught while reading stream response"
+        "message": "exception caught while reading..."
     }
 
     mock_detections = []
