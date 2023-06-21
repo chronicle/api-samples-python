@@ -19,6 +19,15 @@ For backward compatibility, the US region is considered as the default.
 
 import argparse
 
+REGION_LIST = (
+    "asia-southeast1",
+    "australia-southeast1",
+    "europe",
+    "europe-west2",
+    "me-west1",
+    "us",
+)
+
 
 def add_argument_region(parser: argparse.ArgumentParser):
   """Adds a shared command-line argument to all the sample modules."""
@@ -28,14 +37,7 @@ def add_argument_region(parser: argparse.ArgumentParser):
       type=str,
       required=False,
       default="us",
-      choices=(
-          "asia-southeast1",
-          "europe",
-          "us",
-          "europe-west2",
-          "australia-southeast1",
-          "me-west1",
-      ),
+      choices=REGION_LIST,
       help="the region where the customer is located (default: us)",
   )
 
