@@ -375,11 +375,17 @@ def stream_detection_alerts(
   disconnection_reason = ""
   continuation_time = ""
 
-  # Heartbeats are sent by the server, approximately every 15s. We impose a
-  # client-side timeout; if more than 60s pass between messages from the
-  # server, the client cancels connection (then retries).
+  # Heartbeats are sent by the server, approximately every 15s. Even if
+  # no new detections are being produced, the server sends empty
+  # batches.
+  # We impose a client-side timeout of 300s (5 mins) between messages from the
+  # server. We expect the server to send messages much more frequently due
+  # to the heratbeats though; this timeout should never be hit, and serves
+  # as a safety measure.
+  # If no messages are received after this timeout, the client cancels
+  # connection (then retries).
   with http_session.post(
-      url, stream=True, data=req_data, timeout=60) as response:
+      url, stream=True, data=req_data, timeout=300) as response:
     # Expected server response is a continuous stream of
     # bytes that represent a never-ending JSON array. The parsing
     # is handed by parse_stream. See docstring above for
