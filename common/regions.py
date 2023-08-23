@@ -24,6 +24,7 @@ REGION_LIST = (
     "australia-southeast1",
     "europe",
     "europe-west2",
+    "europe-west6",
     "me-west1",
     "us",
 )
