@@ -14,32 +14,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-r"""Executable and reusable sample for creating a detection rule.
+r"""Executable sample for enabling a rule.
 
 Sample Commands (run from api_samples_python dir):
-    # From file
-    python3 -m detect.v1alpha.create_rule \
-        --region $region \
-        --project_instance $project_instance \
-        --project_id $PROJECT_ID \
-        --rule_file=./path/to/rule/rulename.yaral
-
-    # From stdin
-    cat ./path/rulename.yaral | python3 -m detect.v1alpha.create_rule \
-        --region $region \
-        --project_instance $project_instance \
-        --project_id $PROJECT_ID \
-        --rule_file -
+    python3 detect.v1alpha.enable_rule -r=<region> \
+        -p=<project_id> -i=<instance_id> \
+        -rid=<rule_id>
 
 API reference:
-  https://cloud.google.com/chronicle/docs/reference/rest/v1alpha/projects.locations.instances.rules/create
-  https://cloud.google.com/chronicle/docs/reference/rest/v1alpha/projects.locations.instances.rules#Rule
+    https://cloud.google.com/chronicle/docs/reference/rest/v1alpha/projects.locations.instances.rules/updateDeployment
+    https://cloud.google.com/chronicle/docs/reference/rest/v1alpha/RuleDeployment
 """
-
 import argparse
 import json
 from typing import Any, Mapping
-
 from common import chronicle_auth
 from common import project_id
 from common import project_instance
@@ -53,24 +41,25 @@ SCOPES = [
 ]
 
 
-def create_rule(
+def enable_rule(
     http_session: requests.AuthorizedSession,
+    proj_region: str,
     proj_id: str,
     proj_instance: str,
-    proj_region: str,
-    rule_file_path: str,
+    rule_id: str,
 ) -> Mapping[str, Any]:
-  """Creates a new detection rule to find matches in logs.
+  """Enables a rule.
 
   Args:
     http_session: Authorized session for HTTP requests.
-    proj_id: GCP project id or number to which the target instance belongs.
-    proj_instance: Customer ID (uuid with dashes) for the Chronicle instance.
-    proj_region: region in which the target project is located.
-    rule_file_path: Content of the new detection rule, used to evaluate logs.
+    proj_region: region in which the target project is located
+    proj_id: GCP project id or number which the target instance belongs to
+    proj_instance: uuid of the instance whose rules are being
+      created (with dashes)
+    rule_id: Unique ID of the detection rule to retrieve ("ru_<UUID>").
 
   Returns:
-    New detection rule.
+    a rule deployment object containing relevant rule's deployment information
 
   Raises:
     requests.exceptions.HTTPError: HTTP request resulted in an error
@@ -82,14 +71,15 @@ def create_rule(
   )
   # pylint: disable-next=line-too-long
   parent = f"projects/{proj_id}/locations/{proj_region}/instances/{proj_instance}"
-  url = f"{base_url_with_region}/v1alpha/{parent}/rules"
-
+  url = f"{base_url_with_region}/v1alpha/{parent}/rules/{rule_id}/deployment"
   body = {
-      "text": rule_file_path.read(),
+      # You can set enabled to False to disable a rule.
+      "enabled": True,
   }
+  params = {"update_mask": "enabled"}
 
   # See API reference links at top of this file, for response format.
-  response = http_session.request("POST", url, json=body)
+  response = http_session.request("PATCH", url, params=params, json=body)
   if response.status_code >= 400:
     print(response.text)
   response.raise_for_status()
@@ -98,28 +88,31 @@ def create_rule(
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
-  # common
   chronicle_auth.add_argument_credentials_file(parser)
   project_instance.add_argument_project_instance(parser)
   project_id.add_argument_project_id(parser)
   regions.add_argument_region(parser)
-  # local
   parser.add_argument(
-      "-f",
-      "--rule_file",
-      type=argparse.FileType("r"),
+      "-rid",
+      "--rule_id",
+      type=str,
       required=True,
-      help="path of a file with the desired rule's content, or - for STDIN",
+      help='ID of rule to be enabled. In the form of "ru_<UUID>"',
   )
   args = parser.parse_args()
-
   auth_session = chronicle_auth.initialize_http_session(
       args.credentials_file,
       SCOPES
   )
-  new_rule = create_rule(auth_session,
-                         args.project_id,
-                         args.project_instance,
-                         args.region,
-                         args.rule_file)
-  print(json.dumps(new_rule, indent=2))
+  print(
+      json.dumps(
+          enable_rule(
+              auth_session,
+              args.region,
+              args.project_id,
+              args.project_instance,
+              args.rule_id,
+          ),
+          indent=2,
+      )
+  )
