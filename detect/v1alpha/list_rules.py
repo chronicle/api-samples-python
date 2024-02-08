@@ -14,18 +14,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-"""Executable and reusable sample for retrieving a list of rules."""
+r"""Executable and reusable sample for retrieving a list of rules.
+
+Sample Commands (run from api_samples_python dir):
+  python3 -m detect.v1alpha.list_rules -r=<region> \
+      -p=<project_id> -i=<instance_id>
+
+API reference:
+  https://cloud.google.com/chronicle/docs/reference/rest/v1alpha/projects.locations.instances.rules/list
+  https://cloud.google.com/chronicle/docs/reference/rest/v1alpha/projects.locations.instances.rules#Rule
+"""
 
 import argparse
 import json
-from typing import Mapping, Any
-
-from google.auth.transport import requests
+from typing import Any, Mapping
 
 from common import chronicle_auth
 from common import project_id
 from common import project_instance
 from common import regions
+from google.auth.transport import requests
+
+CHRONICLE_API_BASE_URL = "https://chronicle.googleapis.com"
 
 SCOPES = [
     "https://www.googleapis.com/auth/cloud-platform",
@@ -51,10 +61,15 @@ def list_rules(
     requests.exceptions.HTTPError: HTTP request resulted in an error
       (response.status_code >= 400).
   """
+  base_url_with_region = regions.url_always_prepend_region(
+      CHRONICLE_API_BASE_URL,
+      args.region
+  )
   # pylint: disable-next=line-too-long
   parent = f"projects/{proj_id}/locations/{proj_region}/instances/{proj_instance}"
-  url = f"https://{proj_region}-chronicle.googleapis.com/v1alpha/{parent}/rules"
+  url = f"{base_url_with_region}/v1alpha/{parent}/rules"
 
+  # See API reference links at top of this file, for response format.
   response = http_session.request("GET", url)
   if response.status_code >= 400:
     print(response.text)

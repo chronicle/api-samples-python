@@ -52,3 +52,21 @@ def url(base_url: str, region: str) -> str:
   if region != "us":
     base_url = base_url.replace("https://", f"https://{region}-")
   return base_url
+
+
+def url_always_prepend_region(base_url: str, region: str) -> str:
+  """Returns a regionalized URL.
+
+  Args:
+    base_url: URL pointing to Chronicle API
+    region: region in which the target project is located
+
+  Returns:
+    A string containing a regionalized URL. Unlike the url() function,
+    this function always prepends region; this function also checks whether
+    the URL already has the region prefix, and if so, returns the URL unchanged.
+    v1alpha samples should use this function.
+  """
+  if not base_url.startswith(f"https://{region}-"):
+    base_url = base_url.replace("https://", f"https://{region}-")
+  return base_url

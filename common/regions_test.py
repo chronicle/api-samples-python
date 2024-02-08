@@ -33,6 +33,26 @@ class RegionsTest(unittest.TestCase):
   def test_url_us(self):
     self.assertEqual(regions.url("https://test", "us"), "https://test")
 
+  def test_url_always_prepend_region_us(self):
+    self.assertEqual(
+        regions.url_always_prepend_region("https://test", "us"),
+        "https://us-test",
+    )
+
+  def test_url_always_prepend_region_europe(self):
+    self.assertEqual(
+        regions.url_always_prepend_region("https://test", "europe"),
+        "https://europe-test",
+    )
+
+  def test_url_always_prepend_region_twice(self):
+    url_once = regions.url_always_prepend_region("https://test", "europe")
+    url_twice = regions.url_always_prepend_region(url_once, "europe")
+    self.assertEqual(
+        "https://europe-test",
+        url_twice,
+    )
+
 
 if __name__ == "__main__":
   unittest.main()
