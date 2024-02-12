@@ -57,3 +57,11 @@ python3 -m detect.v2.<sample_name> -h
 ```shell
 python3 -m lists.<sample_name> -h
 ```
+
+### Lists API v1alpha
+
+```
+python -m lists.v1alpha.create_list -h
+python -m lists.v1alpha.get_list -h
+python -m lists.v1alpha.patch_list -h
+```
