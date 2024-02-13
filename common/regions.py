@@ -24,12 +24,13 @@ REGION_LIST = (
     "asia-south1",
     "asia-southeast1",
     "australia-southeast1",
-    "europe",
+    "eu",
     "europe-west2",
     "europe-west3",
     "europe-west6",
     "me-central2",
     "me-west1",
+    "northamerica-northeast2",
     "us",
 )
 

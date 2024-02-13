@@ -26,9 +26,9 @@ class RegionsTest(unittest.TestCase):
         regions.url("https://test", "asia-southeast1"),
         "https://asia-southeast1-test")
 
-  def test_url_europe(self):
+  def test_url_eu(self):
     self.assertEqual(
-        regions.url("https://test", "europe"), "https://europe-test")
+        regions.url("https://test", "eu"), "https://eu-test")
 
   def test_url_us(self):
     self.assertEqual(regions.url("https://test", "us"), "https://test")
@@ -39,17 +39,17 @@ class RegionsTest(unittest.TestCase):
         "https://us-test",
     )
 
-  def test_url_always_prepend_region_europe(self):
+  def test_url_always_prepend_region_e(self):
     self.assertEqual(
-        regions.url_always_prepend_region("https://test", "europe"),
-        "https://europe-test",
+        regions.url_always_prepend_region("https://test", "eu"),
+        "https://eu-test",
     )
 
   def test_url_always_prepend_region_twice(self):
-    url_once = regions.url_always_prepend_region("https://test", "europe")
-    url_twice = regions.url_always_prepend_region(url_once, "europe")
+    url_once = regions.url_always_prepend_region("https://test", "eu")
+    url_twice = regions.url_always_prepend_region(url_once, "eu")
     self.assertEqual(
-        "https://europe-test",
+        "https://eu-test",
         url_twice,
     )
 
