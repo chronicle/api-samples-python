@@ -29,6 +29,7 @@ REGION_LIST = (
     "europe-west2",
     "europe-west3",
     "europe-west6",
+    "me-central1",
     "me-central2",
     "me-west1",
     "northamerica-northeast2",
