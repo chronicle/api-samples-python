@@ -1,2 +1,2 @@
 google-auth
-requests
+requests < 2.32
