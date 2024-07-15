@@ -96,6 +96,130 @@ VERDICT_ENUM = (
 )
 
 
+def get_update_parser():
+  """Returns an argparse.ArgumentParser for the update_alert command."""
+  parser = argparse.ArgumentParser()
+  chronicle_auth.add_argument_credentials_file(parser)
+  project_instance.add_argument_project_instance(parser)
+  project_id.add_argument_project_id(parser)
+  regions.add_argument_region(parser)
+  parser.add_argument(
+      "--comment",
+      type=str,
+      required=False,
+      default=None,
+      help="Analyst comment.",
+  )
+  parser.add_argument(
+      "--confidence_score",
+      type=int,
+      required=False,
+      default=None,
+      help="confidence score [1-100] of the finding",
+  )
+  parser.add_argument(
+      "--disregarded",
+      type=bool,
+      required=False,
+      default=None,
+      help="Analyst disregard (or un-disregard) the event",
+  )
+  parser.add_argument(
+      "--priority",
+      choices=PRIORITY_ENUM,
+      required=False,
+      default=None,
+      help="alert priority.",
+  )
+  parser.add_argument(
+      "--reason",
+      choices=REASON_ENUM,
+      required=False,
+      default=None,
+      help="reason for closing an Alert",
+  )
+  parser.add_argument(
+      "--reputation",
+      choices=REPUTATION_ENUM,
+      required=False,
+      default=None,
+      help="A categorization of the finding as useful or not useful",
+  )
+  parser.add_argument(
+      "--risk_score",
+      type=int,
+      required=False,
+      default=None,
+      help="risk score [0-100] of the finding",
+  )
+  parser.add_argument(
+      "--root_cause",
+      type=str,
+      required=False,
+      default=None,
+      help="Alert root cause.",
+  )
+  parser.add_argument(
+      "--status",
+      choices=STATUS_ENUM,
+      required=False,
+      default=None,
+      help="alert status",
+  )
+  parser.add_argument(
+      "--verdict",
+      choices=VERDICT_ENUM,
+      required=False,
+      default=None,
+      help="a verdict on whether the finding reflects a security incident",
+  )
+  parser.add_argument(
+      "--severity",
+      type=int,
+      required=False,
+      default=None,
+      help="severity score [0-100] of the finding",
+  )
+  return parser
+
+
+def check_args(
+    parser: argparse.ArgumentParser,
+    args_to_check: argparse.Namespace):
+  """Checks if at least one of the required arguments is provided.
+
+  Args:
+    parser: instance of argparse.ArgumentParser (to raise error if needed).
+    args_to_check: instance of argparse.Namespace with the arguments to check.
+  """
+  if not any(
+      [
+          args_to_check.comment or args.comment == "",  # pylint: disable=g-explicit-bool-comparison
+          args_to_check.disregarded,
+          args_to_check.priority,
+          args_to_check.reason,
+          args_to_check.reputation,
+          args_to_check.risk_score or args.risk_score == 0,
+          args_to_check.root_cause or args.root_cause == "",  # pylint: disable=g-explicit-bool-comparison
+          args_to_check.severity or args.severity == 0,
+          args_to_check.status,
+          args_to_check.verdict,
+      ]
+  ):
+    parser.error("At least one of the arguments "
+                 "--comment, "
+                 "--disregarded, "
+                 "--priority, "
+                 "--reason, "
+                 "--reputation, "
+                 "--risk_score, "
+                 "--root_cause, "
+                 "--severity, "
+                 "--status, "
+                 "or --verdict "
+                 "is required.")
+
+
 def update_alert(
     http_session: requests.AuthorizedSession,
     proj_id: str,
@@ -189,114 +313,15 @@ def update_alert(
 
 
 if __name__ == "__main__":
-  parser = argparse.ArgumentParser()
-  chronicle_auth.add_argument_credentials_file(parser)
-  project_instance.add_argument_project_instance(parser)
-  project_id.add_argument_project_id(parser)
-  regions.add_argument_region(parser)
-  parser.add_argument(
+  main_parser = get_update_parser()
+  main_parser.add_argument(
       "--alert_id", type=str, required=True,
       help="identifier for the alert"
   )
-  parser.add_argument(
-      "--confidence_score",
-      type=int,
-      required=False,
-      default=None,
-      help="confidence score [1-100] of the finding",
-  )
-  parser.add_argument(
-      "--priority",
-      choices=PRIORITY_ENUM,
-      required=False,
-      default=None,
-      help="alert priority.",
-  )
-  parser.add_argument(
-      "--reason",
-      choices=REASON_ENUM,
-      required=False,
-      default=None,
-      help="reason for closing an Alert",
-  )
-  parser.add_argument(
-      "--reputation",
-      choices=REPUTATION_ENUM,
-      required=False,
-      default=None,
-      help="A categorization of the finding as useful or not useful",
-  )
-  parser.add_argument(
-      "--status",
-      choices=STATUS_ENUM,
-      required=False,
-      default=None,
-      help="alert status",
-  )
-  parser.add_argument(
-      "--verdict",
-      choices=VERDICT_ENUM,
-      required=False,
-      default=None,
-      help="a verdict on whether the finding reflects a security incident",
-  )
-  parser.add_argument(
-      "--risk_score",
-      type=int,
-      required=False,
-      default=None,
-      help="risk score [0-100] of the finding",
-  )
-  parser.add_argument(
-      "--disregarded",
-      type=bool,
-      required=False,
-      default=None,
-      help="Analyst disregard (or un-disregard) the event",
-  )
-  parser.add_argument(
-      "--severity",
-      type=int,
-      required=False,
-      default=None,
-      help="severity score [0-100] of the finding",
-  )
-  parser.add_argument(
-      "--comment",
-      type=str,
-      required=False,
-      default=None,
-      help="Analyst comment.",
-  )
-  parser.add_argument(
-      "--root_cause",
-      type=str,
-      required=False,
-      default=None,
-      help="Alert root cause.",
-  )
-
-  args = parser.parse_args()
+  args = main_parser.parse_args()
 
   # Check if at least one of the specific arguments is provided
-  if not any(
-      [
-          args.reason,
-          args.reputation,
-          args.priority,
-          args.status,
-          args.verdict,
-          args.risk_score or args.risk_score == 0,
-          args.disregarded,
-          args.severity or args.severity == 0,
-          args.comment or args.comment == "",  # pylint: disable=g-explicit-bool-comparison
-          args.root_cause or args.root_cause == "",  # pylint: disable=g-explicit-bool-comparison
-      ]
-  ):
-    parser.error("At least one of the arguments --reputation, --reason, "
-                 "--priority, --status, --verdict, --risk_score, "
-                 "--disregarded, --severity, --comment, "
-                 "or --root_cause is required.")
+  check_args(main_parser, args)
 
   auth_session = chronicle_auth.initialize_http_session(
       args.credentials_file,
