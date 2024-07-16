@@ -194,14 +194,14 @@ def check_args(
   """
   if not any(
       [
-          args_to_check.comment or args.comment == "",  # pylint: disable=g-explicit-bool-comparison
+          args_to_check.comment or args_to_check.comment == "",  # pylint: disable=g-explicit-bool-comparison
           args_to_check.disregarded,
           args_to_check.priority,
           args_to_check.reason,
           args_to_check.reputation,
-          args_to_check.risk_score or args.risk_score == 0,
-          args_to_check.root_cause or args.root_cause == "",  # pylint: disable=g-explicit-bool-comparison
-          args_to_check.severity or args.severity == 0,
+          args_to_check.risk_score or args_to_check.risk_score == 0,
+          args_to_check.root_cause or args_to_check.root_cause == "",  # pylint: disable=g-explicit-bool-comparison
+          args_to_check.severity or args_to_check.severity == 0,
           args_to_check.status,
           args_to_check.verdict,
       ]
