@@ -122,17 +122,17 @@ def patch_list(
   parent = f"projects/{proj_id}/locations/{proj_region}/instances/{proj_instance}"
   url = f"{base_url_with_region}/v1alpha/{parent}/referenceLists/{name}"
   body = {
-      "name": name,
-      "entries": [{"value": line.strip()} for line in content_lines]
+      "entries": [{"value": line.strip()} for line in content_lines],
+      "scope_info": None,  # assumes Data RBAC is disabled
   }
   if description:
     body["description"] = description
   if syntax_type:
     body["syntax_type"] = syntax_type
+  params = {"updateMask": ",".join(body.keys())}
+  body["name"] = name
 
-  # omit the updateMask query string param:
-  #  "When no field mask is supplied, all non-empty fields will be updated."
-  response = http_session.request("PATCH", url, json=body)
+  response = http_session.request("PATCH", url, params=params, json=body)
   if response.status_code >= 400:
     print(response.text)
   response.raise_for_status()
