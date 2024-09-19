@@ -91,6 +91,7 @@ def patch_list(
     content_lines: Sequence[str],
     syntax_type: Optional[str] = None,
     description: Optional[str] = None,
+    scope_name: Optional[str] = None,
 ) -> Dict[str, Any]:
   """Updates a Reference List.
 
@@ -107,6 +108,7 @@ def patch_list(
     content_lines: Array containing each line of the list's content.
     syntax_type: (Optional) List content type; how to interpret this list.
     description: (Optional) Description of the list.
+    scope_name: (Optional) Data RBAC scope name.
   Returns:
     Dictionary representation of the updated Reference List.
 
@@ -118,20 +120,30 @@ def patch_list(
       CHRONICLE_API_BASE_URL,
       proj_region
   )
+
   # pylint: disable-next=line-too-long
   parent = f"projects/{proj_id}/locations/{proj_region}/instances/{proj_instance}"
   url = f"{base_url_with_region}/v1alpha/{parent}/referenceLists/{name}"
   body = {
       "entries": [{"value": line.strip()} for line in content_lines],
-      "scope_info": None,  # assumes Data RBAC is disabled
   }
+  if scope_name:
+    body["scope_info"] = {
+        "referenceListScope": {
+            "scopeNames": [
+                f"projects/{proj_id}/locations/{proj_region}/instances/{proj_instance}/dataAccessScopes/{scope_name}"
+            ]
+        }
+    }
+  else:
+    body["scope_info"] = None  # does *not* remove scope_info
   if description:
     body["description"] = description
   if syntax_type:
     body["syntax_type"] = syntax_type
+
   params = {"updateMask": ",".join(body.keys())}
   body["name"] = name
-
   response = http_session.request("PATCH", url, params=params, json=body)
   if response.status_code >= 400:
     print(response.text)
@@ -156,6 +168,9 @@ def parse_arguments():
                       help="path of a file containing the list content")
   parser.add_argument("-d", "--description", type=str,
                       help="description of the list")
+  parser.add_argument(
+      "-s", "--scope_name", type=str, help="data RBAC scope name for the list"
+  )
   parser.add_argument("-t", "--syntax_type", type=str, default=None,
                       choices=SYNTAX_TYPE_ENUM,
                       help="syntax type of the list, used for validation")
@@ -248,6 +263,7 @@ def main():
         content_lines,
         args.syntax_type,
         args.description,
+        args.scope_name,
     )
     updated_list, ts = get_current_state(auth_session, args)
     # no need to compare sets if updated ts matches
