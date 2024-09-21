@@ -25,7 +25,7 @@
 # pylint: enable=line-too-long
 
 import argparse
-from typing import Sequence
+from typing import Any, Dict, Optional, Sequence
 
 from google.auth.transport import requests
 
@@ -34,6 +34,7 @@ from common import project_id
 from common import project_instance
 from common import regions
 
+CHRONICLE_API_BASE_URL = "https://chronicle.googleapis.com"
 SCOPES = [
     "https://www.googleapis.com/auth/cloud-platform",
 ]
@@ -55,7 +56,8 @@ def create_list(
     description: str,
     content_lines: Sequence[str],
     content_type: str,
-) -> str:
+    scope_name: Optional[str] | None = None,
+) -> Dict[str, Any]:
   """Creates a list.
 
   Args:
@@ -67,18 +69,21 @@ def create_list(
     description: Description of the list.
     content_lines: Array containing each line of the list's content.
     content_type: Type of list content, indicating how to interpret this list.
-
+    scope_name: (Optional) Data RBAC scope name for the list.
   Returns:
-    Creation timestamp of the new list.
+    Dictionary representation of the created Reference List.
 
   Raises:
     requests.exceptions.HTTPError: HTTP request resulted in an error
       (response.status_code >= 400).
   """
-
   # pylint: disable=line-too-long
+  base_url_with_region = regions.url_always_prepend_region(
+      CHRONICLE_API_BASE_URL,
+      proj_region
+  )
   parent = f"projects/{proj_id}/locations/{proj_region}/instances/{proj_instance}"
-  url = f"https://{proj_region}-chronicle.googleapis.com/v1alpha/{parent}/referenceLists"
+  url = f"{base_url_with_region}/v1alpha/{parent}/referenceLists"
   # pylint: enable=line-too-long
 
   # entries are list like [{"value": <string>}, ...]
@@ -94,15 +99,25 @@ def create_list(
       "entries": entries,
       "syntax_type": content_type,
   }
-  url_w_query_string = f"{url}?referenceListId={name}"
-  response = http_session.request("POST", url_w_query_string, json=body)
+  if scope_name:
+    body["scope_info"] = {
+        "referenceListScope": {
+            "scopeNames": [
+                f"projects/{proj_id}/locations/{proj_region}/instances/{proj_instance}/dataAccessScopes/{scope_name}"
+            ]
+        }
+    }
+  else:
+    body["scope_info"] = None
+  params = {"referenceListId": name}
+  response = http_session.request("POST", url, params=params, json=body)
   # Expected server response:
   # ['name', 'displayName', 'revisionCreateTime', 'description',
   #  'entries', 'syntaxType'])
   if response.status_code >= 400:
     print(response.text)
   response.raise_for_status()
-  return response.json()["revisionCreateTime"]
+  return response.json()
 
 
 if __name__ == "__main__":
@@ -120,6 +135,9 @@ if __name__ == "__main__":
       type=str,
       required=True,
       help="description of the list",
+  )
+  parser.add_argument(
+      "-s", "--scope_name", type=str, help="data RBAC scope name for the list"
   )
   parser.add_argument(
       "-t",
@@ -146,7 +164,7 @@ if __name__ == "__main__":
 
   # pylint: disable-next=line-too-long
   auth_session = chronicle_auth.initialize_http_session(args.credentials_file, SCOPES)
-  new_list_create_time = create_list(
+  response_json = create_list(
       auth_session,
       args.project_id,
       args.project_instance,
@@ -155,5 +173,7 @@ if __name__ == "__main__":
       args.description,
       args.list_file.read().splitlines(),
       args.syntax_type,
+      args.scope_name,
   )
-  print(f"New list created successfully, at {new_list_create_time}")
+  print("New list created successfully, at "
+        f"{response_json.get('revisionCreateTime')}")
