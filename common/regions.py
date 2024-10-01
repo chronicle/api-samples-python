@@ -35,6 +35,7 @@ REGION_LIST = (
     "me-central2",
     "me-west1",
     "northamerica-northeast2",
+    "southamerica-east1",
     "us",
 )
 
