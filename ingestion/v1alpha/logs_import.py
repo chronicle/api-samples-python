@@ -2,7 +2,9 @@
 
 import argparse
 import base64
+import datetime
 import json
+import logging
 
 from google.auth.transport import requests
 
@@ -15,11 +17,8 @@ SCOPES = [
     "https://www.googleapis.com/auth/cloud-platform",
 ]
 
-#LOGS = base64.b64encode(b"""2024-01-29 09:03:06.000000001 client 192.168.109.254#12345: query: google.com IN A + (1.2.3.4)
-#2024-01-29 09:03:07.000000001 client 192.168.109.252#12345: query: bbc.com IN A + (5.6.7.8)
-#""").decode("utf-8")
 
-def logs_import(http_session: requests.AuthorizedSession, logs_file) -> None:
+def logs_import(http_session: requests.AuthorizedSession, logs_file) -> dict:
   log_type = "GCP_CLOUDAUDIT"
   parent = f"projects/{args.project_id}/" \
            f"locations/{args.region}/" \
@@ -31,13 +30,14 @@ def logs_import(http_session: requests.AuthorizedSession, logs_file) -> None:
   # Reset file pointer to beginning in case it needs to be read again
   logs_file.seek(0)
   logs = base64.b64encode(logs.encode("utf-8")).decode("utf-8")
+  now = datetime.datetime.now(datetime.timezone.utc).isoformat()
   body = {
     "inline_source": {
       "logs": [
         {
           "data": logs,
-          "log_entry_time": "2025-01-29T15:01:23.045123456Z",
-          "collection_time": "2025-01-29T16:01:23.045123456Z",
+          "log_entry_time": now,
+          "collection_time": now,
          },
       ],
       "forwarder": f"projects/{args.project_id}/"
@@ -48,13 +48,20 @@ def logs_import(http_session: requests.AuthorizedSession, logs_file) -> None:
   }
   response = http_session.request("POST", url, json=body)
   if response.status_code >= 400:
-    print(response.text)
+    logging.error(f"Error response: {response.text}")
   response.raise_for_status()
-  print(response.status_code)
+  logging.info(f"Request successful with status code: {response.status_code}")
   return response.json()
 
 
 if __name__ == "__main__":
+  # Configure logging
+  logging.basicConfig(
+      level=logging.INFO,
+      format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  )
+  logger = logging.getLogger(__name__)
+
   parser = argparse.ArgumentParser()
   # common
   chronicle_auth.add_argument_credentials_file(parser)
@@ -77,4 +84,9 @@ if __name__ == "__main__":
       args.credentials_file,
       SCOPES,
   )
-  print(json.dumps(logs_import(auth_session, args.logs_file)))
+  try:
+    result = logs_import(auth_session, args.logs_file)
+    logging.info("Import operation completed successfully")
+    print(json.dumps(result, indent=2))
+  except Exception as e:
+    logging.error(f"Import operation failed: {str(e)}")
