@@ -18,14 +18,31 @@ SCOPES = [
 ]
 
 
-def logs_import(http_session: requests.AuthorizedSession, logs_file) -> dict:
+def logs_import(http_session: requests.AuthorizedSession, logs_file, project_id: str,
+             region: str, project_instance: str, forwarder_id: str) -> dict:
+  """Imports logs to Chronicle using the GCP CLOUDAUDIT log type.
+  
+  Args:
+    http_session: Authorized session for HTTP requests.
+    logs_file: File-like object containing the logs to import.
+    project_id: Google Cloud project ID.
+    region: Chronicle region.
+    project_instance: Chronicle instance.
+    forwarder_id: UUID4 of the forwarder.
+    
+  Returns:
+    dict: JSON response from the API.
+    
+  Raises:
+    requests.HTTPError: If the request fails.
+  """
   log_type = "GCP_CLOUDAUDIT"
-  parent = f"projects/{args.project_id}/" \
-           f"locations/{args.region}/" \
-           f"instances/{args.project_instance}/" \
-           f"logTypes/{log_type}"
-  url = f"https://{args.region}-chronicle.googleapis.com/" \
-        f"v1alpha/{parent}/logs:import"
+  parent = (f"projects/{project_id}/"
+            f"locations/{region}/"
+            f"instances/{project_instance}/"
+            f"logTypes/{log_type}")
+  url = (f"https://{region}-chronicle.googleapis.com/"
+         f"v1alpha/{parent}/logs:import")
   logs = logs_file.read()
   # Reset file pointer to beginning in case it needs to be read again
   logs_file.seek(0)
@@ -38,23 +55,24 @@ def logs_import(http_session: requests.AuthorizedSession, logs_file) -> dict:
           "data": logs,
           "log_entry_time": now,
           "collection_time": now,
-         },
+        },
       ],
-      "forwarder": f"projects/{args.project_id}/"
-                   f"locations/{args.region}/"
-                   f"instances/{args.project_instance}/"
-                   f"forwarders/{args.forwarder_id}"
+      "forwarder": (f"projects/{project_id}/"
+                   f"locations/{region}/"
+                   f"instances/{project_instance}/"
+                   f"forwarders/{forwarder_id}")
     }
   }
   response = http_session.request("POST", url, json=body)
   if response.status_code >= 400:
-    logging.error(f"Error response: {response.text}")
+    logging.error("Error response: %s", response.text)
   response.raise_for_status()
-  logging.info(f"Request successful with status code: {response.status_code}")
+  logging.info("Request successful with status code: %d", response.status_code)
   return response.json()
 
 
-if __name__ == "__main__":
+def main():
+  """Main entry point for the logs import script."""
   # Configure logging
   logging.basicConfig(
       level=logging.INFO,
@@ -62,7 +80,7 @@ if __name__ == "__main__":
   )
   logger = logging.getLogger(__name__)
 
-  parser = argparse.ArgumentParser()
+  parser = argparse.ArgumentParser(description="Import logs to Chronicle.")
   # common
   chronicle_auth.add_argument_credentials_file(parser)
   project_instance.add_argument_project_instance(parser)
@@ -70,23 +88,36 @@ if __name__ == "__main__":
   regions.add_argument_region(parser)
   # local
   parser.add_argument(
-    "--forwarder_id",
-    type=str,
-    required=True,
-    help="UUID4 of the forwarder")
+      "--forwarder_id",
+      type=str,
+      required=True,
+      help="UUID4 of the forwarder")
   parser.add_argument(
-    "--logs_file",
-    type=argparse.FileType("r"),
-    required=True,
-    help="path to a log file (or \"-\" for STDIN)")
+      "--logs_file",
+      type=argparse.FileType("r"),
+      required=True,
+      help="path to a log file (or \"-\" for STDIN)")
   args = parser.parse_args()
   auth_session = chronicle_auth.initialize_http_session(
       args.credentials_file,
       SCOPES,
   )
   try:
-    result = logs_import(auth_session, args.logs_file)
+    result = logs_import(
+        auth_session, 
+        args.logs_file,
+        args.project_id,
+        args.region,
+        args.project_instance,
+        args.forwarder_id
+    )
     logging.info("Import operation completed successfully")
     print(json.dumps(result, indent=2))
-  except Exception as e:
-    logging.error(f"Import operation failed: {str(e)}")
+  except Exception as e:  # pylint: disable=broad-except
+    logging.error("Import operation failed: %s", str(e))
+    return 1
+  return 0
+
+
+if __name__ == "__main__":
+    main()
