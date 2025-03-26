@@ -1,0 +1,2 @@
+[console_scripts]
+chronicle = cli.cli:cli
