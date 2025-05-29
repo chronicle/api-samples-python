@@ -16,7 +16,7 @@
 #
 r"""Executable and reusable sample for bulk updating alerts.
 
-The file provided to the --alert_ids_file parameter should have one alert 
+The file provided to the --alert_ids_file parameter should have one alert
  ID per line like so:
 ```
 de_ad9d2771-a567-49ee-6452-1b2db13c1d33
