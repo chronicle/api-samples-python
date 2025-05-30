@@ -15,17 +15,15 @@
 # limitations under the License.
 #
 # pylint: disable=line-too-long
-r"""Executable and reusable v1alpha API sample for getting a rule.
+r"""Executable and reusable v1alpha API sample for importing events into Chronicle.
 
 API reference:
-https://cloud.google.com/chronicle/docs/reference/rest/v1alpha/projects.locations.instances.rules/get
-https://cloud.google.com/chronicle/docs/reference/rest/v1alpha/projects.locations.instances.rules#Rule
+https://cloud.google.com/chronicle/docs/reference/rest/v1alpha/projects.locations.instances.events/import
 """
 # pylint: enable=line-too-long
 
 import argparse
 import json
-from typing import Any, Mapping
 
 from common import chronicle_auth
 from common import project_id
@@ -39,46 +37,46 @@ SCOPES = [
 ]
 
 
-def get_rule(
-    http_session: requests.AuthorizedSession,
-    proj_id: str,
-    proj_instance: str,
-    proj_region: str,
-    rule_id: str,
-) -> Mapping[str, Any]:
-  """Gets a rule using the Get Rule API.
+def import_events(http_session: requests.AuthorizedSession, proj_id: str,
+                  proj_instance: str, proj_region: str,
+                  json_events: str) -> None:
+  """Import events into Chronicle using the Events Import API.
 
   Args:
-    http_session: Authorized session for HTTP requests.
-    proj_id: GCP project id or number to which the target instance belongs.
-    proj_instance: Customer ID (uuid w/ dashes) for the Chronicle instance.
-    proj_region: Region where the target project is located.
-    rule_id: Unique ID of the detection rule to retrieve ("ru_<UUID>" or
-        "ru_<UUID>@v_<seconds>_<nanoseconds>"). If a version suffix isn't
-        specified we use the rule's latest version.
-
-  Returns:
-    Dictionary containing the rule's information.
+      http_session: Authorized session for HTTP requests.
+      proj_id: GCP project id or number to which the target instance belongs.
+      proj_instance: Customer ID (uuid w/ dashes) for the Chronicle instance.
+      proj_region: region in which the target project is located.
+      json_events: Events in (serialized) JSON format.
 
   Raises:
-    requests.exceptions.HTTPError: HTTP request resulted in an error
-        (response.status_code >= 400).
+      requests.exceptions.HTTPError: HTTP request resulted in an error
+          (response.status_code >= 400).
 
   Requires the following IAM permission on the parent resource:
-  chronicle.rules.get
+  chronicle.events.import
   """
   base_url_with_region = regions.url_always_prepend_region(
       CHRONICLE_API_BASE_URL, proj_region)
-  # pylint: disable-next=line-too-long
+  # pylint: disable=line-too-long
   parent = f"projects/{proj_id}/locations/{proj_region}/instances/{proj_instance}"
-  url = f"{base_url_with_region}/v1alpha/{parent}/rules/{rule_id}"
+  url = f"{base_url_with_region}/v1alpha/{parent}/events:import"
+  # pylint: enable=line-too-long
 
-  response = http_session.request("GET", url)
+  body = {
+      "events": json.loads(json_events),
+  }
+
+  response = http_session.request("POST", url, json=body)
   if response.status_code >= 400:
     print(response.text)
   response.raise_for_status()
 
-  return response.json()
+  result = response.json()
+  if "successCount" in result:
+    print(f"Successfully imported {result['successCount']} events")
+  if "failureCount" in result:
+    print(f"Failed to import {result['failureCount']} events")
 
 
 if __name__ == "__main__":
@@ -89,23 +87,18 @@ if __name__ == "__main__":
   project_id.add_argument_project_id(parser)
   regions.add_argument_region(parser)
   # local
-  parser.add_argument("--rule_id",
-                      type=str,
-                      required=True,
-                      help='Rule ID to retrieve ("ru_<UUID>" '
-                      'or "ru_<UUID>@v_<seconds>_<nanoseconds>")')
+  parser.add_argument(
+      "--json_events_file",
+      type=argparse.FileType("r"),
+      required=True,
+      help="path to a file (or \"-\" for STDIN) containing events in JSON "
+      "format"
+  )
 
   args = parser.parse_args()
-
   auth_session = chronicle_auth.initialize_http_session(
       args.credentials_file,
       SCOPES,
   )
-  rule = get_rule(
-      auth_session,
-      args.project_id,
-      args.project_instance,
-      args.region,
-      args.rule_id,
-  )
-  print(json.dumps(rule, indent=2))
+  import_events(auth_session, args.project_id, args.project_instance,
+                args.region, args.json_events_file.read())
