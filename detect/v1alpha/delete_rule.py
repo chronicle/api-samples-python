@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2024 Google LLC
+# Copyright 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -66,9 +66,7 @@ def delete_rule(
       (response.status_code >= 400).
   """
   base_url_with_region = regions.url_always_prepend_region(
-      CHRONICLE_API_BASE_URL,
-      args.region
-  )
+      CHRONICLE_API_BASE_URL, args.region)
   # pylint: disable-next=line-too-long
   parent = f"projects/{proj_id}/locations/{proj_region}/instances/{proj_instance}"
   url = f"{base_url_with_region}/v1alpha/{parent}/rules/{rule_id}"
@@ -95,10 +93,8 @@ if __name__ == "__main__":
       help='ID of rule to be deleted. In the form of "ru_<UUID>"',
   )
   args = parser.parse_args()
-  auth_session = chronicle_auth.initialize_http_session(
-      args.credentials_file,
-      SCOPES
-  )
+  auth_session = chronicle_auth.initialize_http_session(args.credentials_file,
+                                                        SCOPES)
   print(
       json.dumps(
           delete_rule(
@@ -109,5 +105,4 @@ if __name__ == "__main__":
               args.rule_id,
           ),
           indent=2,
-      )
-  )
+      ))
