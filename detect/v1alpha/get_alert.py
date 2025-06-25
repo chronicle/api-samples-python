@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2024 Google LLC
+# Copyright 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,18 +14,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-r"""Executable and reusable sample for getting a Reference List.
+# pylint: disable=line-too-long
+r"""Executable and reusable v1alpha API sample for getting an Alert.
 
 Usage:
-  python -m alerts.v1alpha.get_alert \
-    --project_id=<PROJECT_ID>   \
+  python -m detect.v1alpha.get_alert \
+    --project_id=<PROJECT_ID> \
     --project_instance=<PROJECT_INSTANCE> \
+    --region=<REGION> \
     --alert_id=<ALERT_ID>
 
 API reference:
-  https://cloud.google.com/chronicle/docs/reference/rest/v1alpha/projects.locations.instances.legacy/legacyGetAlert
-
+https://cloud.google.com/chronicle/docs/reference/rest/v1alpha/projects.locations.instances.legacy/legacyGetAlert
 """
+# pylint: enable=line-too-long
 
 import argparse
 import json
@@ -35,7 +37,6 @@ from common import chronicle_auth
 from common import project_id
 from common import project_instance
 from common import regions
-
 from google.auth.transport import requests
 
 CHRONICLE_API_BASE_URL = "https://chronicle.googleapis.com"
@@ -52,7 +53,7 @@ def get_alert(
     alert_id: str,
     include_detections: bool = False,
 ) -> Mapping[str, Any]:
-  """Gets an Alert.
+  """Gets an Alert using the Legacy Get Alert API.
 
   Args:
     http_session: Authorized session for HTTP requests.
@@ -63,54 +64,54 @@ def get_alert(
     include_detections: Flag to include detections.
 
   Returns:
-    Dictionary representation of the Alert
+    Dictionary representation of the Alert.
 
   Raises:
     requests.exceptions.HTTPError: HTTP request resulted in an error
       (response.status_code >= 400).
+
+  Requires the following IAM permission on the parent resource:
+  chronicle.alerts.get
   """
   base_url_with_region = regions.url_always_prepend_region(
-      CHRONICLE_API_BASE_URL,
-      proj_region
-  )
-  # pylint: disable-next=line-too-long
+      CHRONICLE_API_BASE_URL, proj_region)
+  # pylint: disable=line-too-long
   parent = f"projects/{proj_id}/locations/{proj_region}/instances/{proj_instance}"
+  url = f"{base_url_with_region}/v1alpha/{parent}/legacy:legacyGetAlert"
+  # pylint: disable=line-too-long
 
   query_params = {"alertId": alert_id}
   if include_detections:
     query_params["includeDetections"] = True
 
-  url = f"{base_url_with_region}/v1alpha/{parent}/legacy:legacyGetAlert"
-
   response = http_session.request("GET", url, params=query_params)
-  # Expected server response is described in:
-  # https://cloud.google.com/chronicle/docs/reference/rest/v1alpha/projects.locations.instances.legacy/legacyGetAlert
   if response.status_code >= 400:
     print(response.text)
   response.raise_for_status()
+
   return response.json()
 
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
+  # common
   chronicle_auth.add_argument_credentials_file(parser)
   project_instance.add_argument_project_instance(parser)
   project_id.add_argument_project_id(parser)
   regions.add_argument_region(parser)
-  parser.add_argument(
-      "--alert_id", type=str, required=True,
-      help="identifier for the alert"
-  )
-  parser.add_argument(
-      "-d", "--include-detections", type=bool, default=False, required=False,
-      help="flag to include detections"
-  )
+  # local
+  parser.add_argument("--alert_id",
+                      type=str,
+                      required=True,
+                      help="Identifier for the alert")
+  parser.add_argument("--include-detections",
+                      action="store_true",
+                      help="Include detections in the response")
+
   args = parser.parse_args()
 
-  auth_session = chronicle_auth.initialize_http_session(
-      args.credentials_file,
-      SCOPES,
-  )
+  auth_session = chronicle_auth.initialize_http_session(args.credentials_file,
+                                                        SCOPES)
   alert = get_alert(
       auth_session,
       args.project_id,

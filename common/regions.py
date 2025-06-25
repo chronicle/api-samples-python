@@ -20,9 +20,11 @@ For backward compatibility, the US region is considered as the default.
 import argparse
 
 REGION_LIST = (
+    "africa-south1",
     "asia-northeast1",
     "asia-south1",
     "asia-southeast1",
+    "asia-southeast2",
     "australia-southeast1",
     "eu",
     "europe",
