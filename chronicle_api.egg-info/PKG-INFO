@@ -1,0 +1,19 @@
+Metadata-Version: 2.2
+Name: chronicle-api
+Version: 0.1.3
+Summary: Chronicle API SDK and CLI
+Author: Google LLC
+Author-email: chronicle-support@google.com
+License: Apache 2.0
+Requires-Python: >=3.10
+License-File: LICENSE
+Requires-Dist: click>=8.0.0
+Requires-Dist: google-auth>=2.0.0
+Requires-Dist: requests>=2.25.0
+Requires-Dist: python-dotenv>=1.0.0
+Dynamic: author
+Dynamic: author-email
+Dynamic: license
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
