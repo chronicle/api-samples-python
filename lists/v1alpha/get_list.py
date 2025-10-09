@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2024 Google LLC
+# Copyright 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,7 +36,6 @@ from common import chronicle_auth
 from common import project_id
 from common import project_instance
 from common import regions
-
 from google.auth.transport import requests
 
 CHRONICLE_API_BASE_URL = "https://chronicle.googleapis.com"
