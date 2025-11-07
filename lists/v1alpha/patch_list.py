@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2024 Google LLC
+# Copyright 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -117,15 +117,15 @@ def patch_list(
       (response.status_code >= 400).
   """
   base_url_with_region = regions.url_always_prepend_region(
-      CHRONICLE_API_BASE_URL,
-      proj_region
-  )
+      CHRONICLE_API_BASE_URL, proj_region)
 
   # pylint: disable-next=line-too-long
   parent = f"projects/{proj_id}/locations/{proj_region}/instances/{proj_instance}"
   url = f"{base_url_with_region}/v1alpha/{parent}/referenceLists/{name}"
   body = {
-      "entries": [{"value": line.strip()} for line in content_lines],
+      "entries": [{
+          "value": line.strip()
+      } for line in content_lines],
   }
   if scope_name:
     body["scope_info"] = {
@@ -161,29 +161,46 @@ def parse_arguments():
   project_instance.add_argument_project_instance(parser)
   project_id.add_argument_project_id(parser)
   regions.add_argument_region(parser)
-  parser.add_argument("-n", "--name", type=str, required=True,
+  parser.add_argument("-n",
+                      "--name",
+                      type=str,
+                      required=True,
                       help="unique name for the list")
-  parser.add_argument("-f", "--list_file", type=argparse.FileType("r"),
+  parser.add_argument("-f",
+                      "--list_file",
+                      type=argparse.FileType("r"),
                       required=True,
                       help="path of a file containing the list content")
-  parser.add_argument("-d", "--description", type=str,
+  parser.add_argument("-d",
+                      "--description",
+                      type=str,
                       help="description of the list")
-  parser.add_argument(
-      "-s", "--scope_name", type=str, help="data RBAC scope name for the list"
-  )
-  parser.add_argument("-t", "--syntax_type", type=str, default=None,
+  parser.add_argument("-s",
+                      "--scope_name",
+                      type=str,
+                      help="data RBAC scope name for the list")
+  parser.add_argument("-t",
+                      "--syntax_type",
+                      type=str,
+                      default=None,
                       choices=SYNTAX_TYPE_ENUM,
                       help="syntax type of the list, used for validation")
   add_delete_group = parser.add_mutually_exclusive_group()
-  add_delete_group.add_argument("--add", action="store_true",
+  add_delete_group.add_argument("--add",
+                                action="store_true",
                                 help="only append to the existing list")
-  add_delete_group.add_argument("--remove", action="store_true",
+  add_delete_group.add_argument("--remove",
+                                action="store_true",
                                 help="only remove from the existing list")
-  parser.add_argument("--force", action="store_true",
+  parser.add_argument("--force",
+                      action="store_true",
                       help="patch regardless of pre-check on changes to list")
-  parser.add_argument("--max_attempts", type=int, default=6,
+  parser.add_argument("--max_attempts",
+                      type=int,
+                      default=6,
                       help="how many times to attempt the patch operation")
-  parser.add_argument("--quiet", action="store_true",
+  parser.add_argument("--quiet",
+                      action="store_true",
                       help="only print the updated list")
   return parser.parse_args()
 
@@ -220,13 +237,16 @@ def get_current_state(auth_session, args):
   return curr_list, curr_json["revisionCreateTime"]
 
 
-def op_update_content_lines(operation_type, curr_list, content_lines,
+def op_update_content_lines(operation_type,
+                            curr_list,
+                            content_lines,
                             force=False):
   """Updates the content lines of a Reference List."""
   if operation_type == "add":
     seen = set(curr_list)
-    deduplicated_list = [x for x in content_lines
-                         if not (x in seen or seen.add(x))]
+    deduplicated_list = [
+        x for x in content_lines if not (x in seen or seen.add(x))
+    ]
     content_lines = curr_list + deduplicated_list
   elif operation_type == "remove":
     content_lines = [item for item in curr_list if item not in content_lines]
@@ -240,17 +260,15 @@ def main():
   args = parse_arguments()
   og_content_lines = read_content_lines(args.list_file)
 
-  auth_session = chronicle_auth.initialize_http_session(
-      args.credentials_file,
-      SCOPES
-  )
+  auth_session = chronicle_auth.initialize_http_session(args.credentials_file,
+                                                        SCOPES)
 
   operation_type = "add" if args.add else "remove" if args.remove else None
 
   curr_list, _ = get_current_state(auth_session, args)
 
-  content_lines = op_update_content_lines(
-      operation_type, curr_list, og_content_lines, args.force)
+  content_lines = op_update_content_lines(operation_type, curr_list,
+                                          og_content_lines, args.force)
 
   attempt, wait_time = 0, 1
   while attempt < args.max_attempts:
@@ -276,15 +294,13 @@ def main():
         print(f"Patch {operation_type or ''} success.")
       print(json.dumps(patched_json, indent=2))
       break
-    wait_time = exponential_backoff(attempt, args.max_attempts,
-                                    wait_time, args.quiet)
+    wait_time = exponential_backoff(attempt, args.max_attempts, wait_time,
+                                    args.quiet)
     # read and verify again in case other processes updated while waiting
     og_content_lines = read_content_lines(args.list_file)
     curr_list, _ = get_current_state(auth_session, args)
-    content_lines = op_update_content_lines(operation_type,
-                                            curr_list,
-                                            og_content_lines,
-                                            args.force)
+    content_lines = op_update_content_lines(operation_type, curr_list,
+                                            og_content_lines, args.force)
     attempt += 1
 
 
