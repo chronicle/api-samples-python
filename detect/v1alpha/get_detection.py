@@ -15,18 +15,18 @@
 # limitations under the License.
 #
 # pylint: disable=line-too-long
-r"""Executable and reusable v1alpha API sample for enabling a detection rule.
+r"""Executable and reusable v1alpha API sample for getting a Detection.
 
 Usage:
-  python -m detect.v1alpha.enable_rule \
+  python -m detect.v1alpha.get_detection \
     --project_id=<PROJECT_ID> \
     --project_instance=<PROJECT_INSTANCE> \
     --region=<REGION> \
-    --rule_id=ru_<UUID>
+    --detection_id=<DETECTION_ID> \
+    --rule_id=<RULE_ID>
 
 API reference:
-https://cloud.google.com/chronicle/docs/reference/rest/v1alpha/projects.locations.instances.rules/updateDeployment
-https://cloud.google.com/chronicle/docs/reference/rest/v1alpha/RuleDeployment
+https://cloud.google.com/chronicle/docs/reference/rest/v1alpha/projects.locations.instances.legacy/legacyGetDetection
 """
 # pylint: enable=line-too-long
 
@@ -46,45 +46,44 @@ SCOPES = [
 ]
 
 
-def enable_rule(
+def get_detection(
     http_session: requests.AuthorizedSession,
     proj_id: str,
     proj_instance: str,
     proj_region: str,
+    detection_id: str,
     rule_id: str,
 ) -> Mapping[str, Any]:
-  """Enables a detection rule.
+  """Gets a Detection using the Legacy Get Detection API.
 
   Args:
     http_session: Authorized session for HTTP requests.
     proj_id: GCP project id or number to which the target instance belongs.
     proj_instance: Customer ID (uuid with dashes) for the Chronicle instance.
     proj_region: region in which the target project is located.
-    rule_id: Unique ID of the detection rule to enable
-      (in the format "ru_<UUID>").
+    detection_id: Identifier for the detection.
+    rule_id: Identifier for the rule that created the detection.
 
   Returns:
-    Dictionary containing the rule's deployment information.
+    Dictionary representation of the Detection.
 
   Raises:
     requests.exceptions.HTTPError: HTTP request resulted in an error
       (response.status_code >= 400).
 
   Requires the following IAM permission on the parent resource:
-  chronicle.rules.updateDeployment
+  chronicle.detections.get
   """
   base_url_with_region = regions.url_always_prepend_region(
       CHRONICLE_API_BASE_URL, proj_region)
-  # pylint: disable-next=line-too-long
+  # pylint: disable=line-too-long
   parent = f"projects/{proj_id}/locations/{proj_region}/instances/{proj_instance}"
-  url = f"{base_url_with_region}/v1alpha/{parent}/rules/{rule_id}/deployment"
+  url = f"{base_url_with_region}/v1alpha/{parent}/legacy:legacyGetDetection"
+  # pylint: enable=line-too-long
 
-  body = {
-      "enabled": True,  # Set to False to disable the rule
-  }
-  params = {"update_mask": "enabled"}
+  query_params = {"detectionId": detection_id, "ruleId": rule_id}
 
-  response = http_session.request("PATCH", url, params=params, json=body)
+  response = http_session.request("GET", url, params=query_params)
   if response.status_code >= 400:
     print(response.text)
   response.raise_for_status()
@@ -100,15 +99,25 @@ if __name__ == "__main__":
   project_id.add_argument_project_id(parser)
   regions.add_argument_region(parser)
   # local
+  parser.add_argument("--detection_id",
+                      type=str,
+                      required=True,
+                      help="Identifier for the detection")
   parser.add_argument("--rule_id",
                       type=str,
                       required=True,
-                      help='ID of rule to enable (format: "ru_<UUID>")')
+                      help="Identifier for the rule that created the detection")
 
   args = parser.parse_args()
 
   auth_session = chronicle_auth.initialize_http_session(args.credentials_file,
                                                         SCOPES)
-  result = enable_rule(auth_session, args.project_id, args.project_instance,
-                       args.region, args.rule_id)
-  print(json.dumps(result, indent=2))
+  detection = get_detection(
+      auth_session,
+      args.project_id,
+      args.project_instance,
+      args.region,
+      args.detection_id,
+      args.rule_id,
+  )
+  print(json.dumps(detection, indent=2))
