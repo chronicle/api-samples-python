@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2024 Google LLC
+# Copyright 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+# pylint: disable=line-too-long
 r"""Executable sample for updating a rule.
 
 Sample Commands (run from api_samples_python dir):
@@ -32,9 +33,11 @@ API reference:
     https://cloud.google.com/chronicle/docs/reference/rest/v1alpha/projects.locations.instances.rules/patch
     https://cloud.google.com/chronicle/docs/reference/rest/v1alpha/projects.locations.instances.rules#Rule
 """
+# pylint: enable=line-too-long
 import argparse
 import json
 from typing import Any, Mapping
+
 from common import chronicle_auth
 from common import project_id
 from common import project_instance
@@ -74,9 +77,7 @@ def update_rule(
 
   """
   base_url_with_region = regions.url_always_prepend_region(
-      CHRONICLE_API_BASE_URL,
-      args.region
-  )
+      CHRONICLE_API_BASE_URL, args.region)
   # pylint: disable-next=line-too-long
   parent = f"projects/{proj_id}/locations/{proj_region}/instances/{proj_instance}"
   url = f"{base_url_with_region}/v1alpha/{parent}/rules/{rule_id}"
@@ -115,10 +116,8 @@ if __name__ == "__main__":
       help="path of a file with the desired rule's content, or - for STDIN",
   )
   args = parser.parse_args()
-  auth_session = chronicle_auth.initialize_http_session(
-      args.credentials_file,
-      SCOPES
-  )
+  auth_session = chronicle_auth.initialize_http_session(args.credentials_file,
+                                                        SCOPES)
   print(
       json.dumps(
           update_rule(
@@ -130,5 +129,4 @@ if __name__ == "__main__":
               args.rule_file,
           ),
           indent=2,
-      )
-  )
+      ))
