@@ -1,4 +1,4 @@
-# Copyright 2024 Google LLC
+# Copyright 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -39,9 +39,15 @@ class PatchListGetCurrentState(unittest.TestCase):
 
     mocked_get_list.return_value = {
         "entries": [
-            {"value": 1},
-            {"value": 2},
-            {"value": 3},
+            {
+                "value": 1
+            },
+            {
+                "value": 2
+            },
+            {
+                "value": 3
+            },
         ],
         "revisionCreateTime": None,
     }
@@ -68,14 +74,18 @@ class PatchListGetCurrentState(unittest.TestCase):
                      expected_result)
 
   @mock.patch("lists.v1alpha.get_list.get_list")
-  def test_get_current_state_with_some_entries_missing_value(self,
-                                                             mocked_get_list):
+  def test_get_current_state_with_some_entries_missing_value(
+      self, mocked_get_list):
     """Test when some "entries" are missing the "value" key."""
     mocked_get_list.return_value = {
         "entries": [
-            {"value": 1},
+            {
+                "value": 1
+            },
             {},  # Missing "value"
-            {"value": 3},
+            {
+                "value": 3
+            },
         ],
         "revisionCreateTime": None,
     }
@@ -106,8 +116,7 @@ class PatchListExponentialBackoffTest(unittest.TestCase):
   @mock.patch("random.uniform", return_value=0.5)
   def test_quiet_mode_suppresses_output(self, _, mock_sleep):
     with unittest.mock.patch(
-        "sys.stdout",
-        new_callable=unittest.mock.MagicMock) as mock_stdout:
+        "sys.stdout", new_callable=unittest.mock.MagicMock) as mock_stdout:
       patch_list.exponential_backoff(1, 3, quiet=True)
       mock_stdout.write.assert_not_called()
       mock_sleep.assert_called_once_with(2.0)
@@ -126,15 +135,14 @@ class PatchListOpUpdateContentLinesTest(unittest.TestCase):
   def test_add_with_duplicates(self):
     curr_list = ["item1", "item2"]
     content_lines = ["item2", "item3"]
-    result = patch_list.op_update_content_lines("add",
-                                                curr_list, content_lines)
+    result = patch_list.op_update_content_lines("add", curr_list, content_lines)
     self.assertEqual(result, ["item1", "item2", "item3"])
 
   def test_remove(self):
     curr_list = ["item1", "item2", "item3"]
     content_lines = ["item2"]  # Items to remove
-    result = patch_list.op_update_content_lines("remove",
-                                                curr_list, content_lines)
+    result = patch_list.op_update_content_lines("remove", curr_list,
+                                                content_lines)
     self.assertEqual(result, ["item1", "item3"])
 
   def test_no_change_no_force(self):
@@ -142,14 +150,17 @@ class PatchListOpUpdateContentLinesTest(unittest.TestCase):
     content_lines = ["item1"]
     with self.assertRaises(SystemExit) as cm:  # Expect the exit behavior
       patch_list.op_update_content_lines("add",
-                                         curr_list, content_lines, force=False)
+                                         curr_list,
+                                         content_lines,
+                                         force=False)
     self.assertEqual(cm.exception.code, 0)
 
   def test_no_change_force(self):
     curr_list = ["item1"]
     content_lines = ["item1"]
     result = patch_list.op_update_content_lines("add",
-                                                curr_list, content_lines,
+                                                curr_list,
+                                                content_lines,
                                                 force=True)
     self.assertEqual(result, ["item1"])
 

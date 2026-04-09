@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2024 Google LLC
+# Copyright 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -55,7 +55,6 @@ from common import chronicle_auth
 from common import project_id
 from common import project_instance
 from common import regions
-
 from google.auth.transport import requests
 
 CHRONICLE_API_BASE_URL = "https://chronicle.googleapis.com"
@@ -183,29 +182,26 @@ def get_update_parser():
   return parser
 
 
-def check_args(
-    parser: argparse.ArgumentParser,
-    args_to_check: argparse.Namespace):
+def check_args(parser: argparse.ArgumentParser,
+               args_to_check: argparse.Namespace):
   """Checks if at least one of the required arguments is provided.
 
   Args:
     parser: instance of argparse.ArgumentParser (to raise error if needed).
     args_to_check: instance of argparse.Namespace with the arguments to check.
   """
-  if not any(
-      [
-          args_to_check.comment or args_to_check.comment == "",  # pylint: disable=g-explicit-bool-comparison
-          args_to_check.disregarded,
-          args_to_check.priority,
-          args_to_check.reason,
-          args_to_check.reputation,
-          args_to_check.risk_score or args_to_check.risk_score == 0,
-          args_to_check.root_cause or args_to_check.root_cause == "",  # pylint: disable=g-explicit-bool-comparison
-          args_to_check.severity or args_to_check.severity == 0,
-          args_to_check.status,
-          args_to_check.verdict,
-      ]
-  ):
+  if not any([
+      args_to_check.comment or args_to_check.comment == "",  # pylint: disable=g-explicit-bool-comparison
+      args_to_check.disregarded,
+      args_to_check.priority,
+      args_to_check.reason,
+      args_to_check.reputation,
+      args_to_check.risk_score or args_to_check.risk_score == 0,
+      args_to_check.root_cause or args_to_check.root_cause == "",  # pylint: disable=g-explicit-bool-comparison
+      args_to_check.severity or args_to_check.severity == 0,
+      args_to_check.status,
+      args_to_check.verdict,
+  ]):
     parser.error("At least one of the arguments "
                  "--comment, "
                  "--disregarded, "
@@ -237,7 +233,7 @@ def update_alert(
     severity: int | None = None,
     comment: str | Literal[""] | None = None,
     root_cause: str | Literal[""] | None = None,
-    ) -> Mapping[str, Any]:
+) -> Mapping[str, Any]:
   """Updates an Alert.
 
   Args:
@@ -266,9 +262,7 @@ def update_alert(
       (response.status_code >= 400).
   """
   base_url_with_region = regions.url_always_prepend_region(
-      CHRONICLE_API_BASE_URL,
-      proj_region
-  )
+      CHRONICLE_API_BASE_URL, proj_region)
   # pylint: disable-next=line-too-long
   parent = f"projects/{proj_id}/locations/{proj_region}/instances/{proj_instance}"
   url = f"{base_url_with_region}/v1alpha/{parent}/legacy:legacyUpdateAlert/"
@@ -314,10 +308,10 @@ def update_alert(
 
 if __name__ == "__main__":
   main_parser = get_update_parser()
-  main_parser.add_argument(
-      "--alert_id", type=str, required=True,
-      help="identifier for the alert"
-  )
+  main_parser.add_argument("--alert_id",
+                           type=str,
+                           required=True,
+                           help="identifier for the alert")
   args = main_parser.parse_args()
 
   # Check if at least one of the specific arguments is provided
