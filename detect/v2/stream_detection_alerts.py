@@ -461,7 +461,7 @@ def stream_detection_alerts_in_retry_loop(
       without success.
 
   """
-  continuation_time = datetime_converter.strftime(initial_continuation_time)
+  continuation_time = datetime_converter.strftime(initial_continuation_time)  # pyrefly: ignore[bad-argument-type]
 
   # Our retry loop uses exponential backoff with a retry limit.
   # For simplicity, we retry for all types of errors.

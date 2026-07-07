@@ -100,7 +100,7 @@ def create_list(
       "syntax_type": content_type,
   }
   if scope_name:
-    body["scope_info"] = {
+    body["scope_info"] = {  # pyrefly: ignore[bad-assignment]
         "referenceListScope": {
             "scopeNames": [
                 f"projects/{proj_id}/locations/{proj_region}/instances/{proj_instance}/dataAccessScopes/{scope_name}"
@@ -108,7 +108,7 @@ def create_list(
         }
     }
   else:
-    body["scope_info"] = None
+    body["scope_info"] = None  # pyrefly: ignore[bad-assignment]
   params = {"referenceListId": name}
   response = http_session.request("POST", url, params=params, json=body)
   # Expected server response:

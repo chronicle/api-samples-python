@@ -72,8 +72,8 @@ def list_errors(
   """
   url = f"{CHRONICLE_API_BASE_URL}/v2/health/errors"
   params_list = [("category", error_category),
-                 ("start_time", datetime_converter.strftime(error_start_time)),
-                 ("end_time", datetime_converter.strftime(error_end_time)),
+                 ("start_time", datetime_converter.strftime(error_start_time)),  # pyrefly: ignore[bad-argument-type]
+                 ("end_time", datetime_converter.strftime(error_end_time)),  # pyrefly: ignore[bad-argument-type]
                  ("rule_filter.version_id", version_id),
                  ("page_size", page_size), ("page_token", page_token)]
   params = {k: v for k, v in params_list if v}

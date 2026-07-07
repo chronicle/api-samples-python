@@ -159,8 +159,8 @@ def list_detections(
   params_list = [
       ("page_size", page_size),
       ("page_token", page_token),
-      ("start_time", datetime_converter.strftime(start_time)),
-      ("end_time", datetime_converter.strftime(end_time)),
+      ("start_time", datetime_converter.strftime(start_time)),  # pyrefly: ignore[bad-argument-type]
+      ("end_time", datetime_converter.strftime(end_time)),  # pyrefly: ignore[bad-argument-type]
       ("list_basis", list_basis),
       ("alert_state", alert_state),
   ]
