@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2024 Google LLC
+# Copyright 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ API reference:
 import argparse
 import json
 from typing import Any, Mapping
+
 from common import chronicle_auth
 from common import project_id
 from common import project_instance
@@ -63,16 +64,14 @@ ALERT_STATES = (
 )
 
 
-def list_detections(
-    http_session: requests.AuthorizedSession,
-    proj_region: str,
-    proj_id: str,
-    proj_instance: str,
-    rule_id: str,
-    alert_state: str | None = None,
-    page_size: int | None = None,
-    page_token: str | None = None
-) -> Mapping[str, Any]:
+def list_detections(http_session: requests.AuthorizedSession,
+                    proj_region: str,
+                    proj_id: str,
+                    proj_instance: str,
+                    rule_id: str,
+                    alert_state: str | None = None,
+                    page_size: int | None = None,
+                    page_token: str | None = None) -> Mapping[str, Any]:
   """List detections for a rule.
 
   Args:
@@ -95,9 +94,7 @@ def list_detections(
       (response.status_code >= 400).
   """
   base_url_with_region = regions.url_always_prepend_region(
-      CHRONICLE_API_BASE_URL,
-      args.region
-  )
+      CHRONICLE_API_BASE_URL, proj_region)
   # pylint: disable-next=line-too-long
   parent = f"projects/{proj_id}/locations/{proj_region}/instances/{proj_instance}"
   url = f"{base_url_with_region}/v1alpha/{parent}/legacy:legacySearchDetections"
@@ -130,11 +127,9 @@ if __name__ == "__main__":
       "--rule_id",
       type=str,
       required=True,
-      help=(
-          "rule id to list detections for. Options are (1) rule_id (2)"
-          " rule_id@v_<seconds>_<nanoseconds> (3) rule_id@- which matches on"
-          " all versions."
-      ),
+      help=("rule id to list detections for. Options are (1) rule_id (2)"
+            " rule_id@v_<seconds>_<nanoseconds> (3) rule_id@- which matches on"
+            " all versions."),
   )
   parser.add_argument(
       "--alert_state",
@@ -155,10 +150,8 @@ if __name__ == "__main__":
       default=None,
   )
   args = parser.parse_args()
-  auth_session = chronicle_auth.initialize_http_session(
-      args.credentials_file,
-      SCOPES
-  )
+  auth_session = chronicle_auth.initialize_http_session(args.credentials_file,
+                                                        SCOPES)
   print(
       json.dumps(
           list_detections(
@@ -172,5 +165,4 @@ if __name__ == "__main__":
               args.page_token,
           ),
           indent=2,
-      )
-  )
+      ))
